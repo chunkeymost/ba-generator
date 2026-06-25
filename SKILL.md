@@ -7,13 +7,15 @@ Aplikasi web statis untuk membuat Berita Acara (BA) UAT. Semua data diproses di 
 | File | Fungsi |
 |---|---|
 | `index.html` | Struktur halaman, form input, preview dokumen |
-| `script.js` | Logika aplikasi: live preview, QR code, signature pad, step validator |
-| `style.css` | Semua styling (dark theme, layout, preview) |
+| `script.js` | Logika aplikasi: live preview, QR code, signature pad, step validator, PDF export |
+| `style.css` | Semua styling (dark theme, layout, preview, print) |
 | `SKILL.md` | File ini — panduan maintenance |
 
 ## Dependensi (CDN)
 Library dimuat via CDN — tidak perlu install npm atau download:
 - **qrcodejs** — `https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js`
+- **jsPDF** — `https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js`
+- **html2canvas** — `https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js`
 
 Tidak ada build tools, tidak ada package.json.
 
@@ -21,30 +23,39 @@ Tidak ada build tools, tidak ada package.json.
 Buka `index.html` langsung dari browser (CDN tetap jalan meski via `file://`).
 
 ## Cara Kerja
-1. Step indicator sticky di atas form menampilkan progress 1-6
-2. Form diisi berurutan — section terkunci sampai step sebelumnya selesai
-3. Signature: canvas digambar manual atau upload gambar
-4. QR code: generate otomatis dari URL (350ms debounce)
-5. Step 6: toggle Verified/Rejected — wajib dipilih, muncul watermark/stamp di preview
+1. Enam form section collapsible di panel kiri — isian langsung tampil di preview panel kanan
+2. Dokumen preview menggunakan format A4 (`aspect-ratio: 210 / 297`, padding ~30mm/25mm)
+3. Signature: canvas digambar manual atau upload gambar, bisa persist via localStorage jika checklist "Set Default" diaktifkan
+4. QR code: generate otomatis dari URL (350ms debounce), validasi URL, auto-prepend `https://`
+5. Random code 10 karakter (alfanumerik + simbol) digenerate otomatis di header dokumen
+6. Tanggal otomatis terisi hari ini, format Indonesia
+7. Step 6: toggle Verified/Rejected — wajib dipilih, muncul watermark/stamp di preview
+8. Tombol "Unduh PDF": disabled sampai semua field (16 fields) + kedua signature terisi. Gunakan `html2canvas` + `jsPDF` untuk export
 
 ## Cara Menambahkan Field Baru
 1. Tambah HTML di panel kiri (copy pola `.field` yang sudah ada)
 2. Tambah element preview di `.doc-page` (panel kanan)
-3. Daftarkan di array `fields` di `script.js` — live sync otomatis
+3. Daftarkan di object `fieldMappings` di `script.js` — live sync otomatis
+4. Update logika validasi di fungsi `validateForm()` jika field baru wajib diisi
 
 ## Catatan Maintenance
-- Tombol "Hapus" dan "Upload gambar" di `.sig-controls` styling seragam: `flex: 1`, `display: inline-flex`
-- Upload gambar menggunakan `<button>` + hidden `<input type="file">` — pastikan selector JS `[data-action="upload-sig"]` sesuai
-- Signature disimpan di canvas (data:image/png) — tidak persist antar sesi
+- Fungsi di `script.js` dibungkus IIFE + `safeRun()` untuk isolasi
+- Signature disimpan di canvas (`data:image/png`), bisa persist antar sesi via localStorage jika "Set Default" dicentang
 - QR code wajib diisi (step 5 terkunci sampai step 4 selesai)
-- Semua `class="underline"` di preview dokumen sudah dihapus
+- `html2canvas` menggunakan scale 3x untuk hasil PDF tajam
+- Nama file PDF diambil dari judul dokumen (sanitasi otomatis)
 - `.doc-page`: `aspect-ratio: 210 / 297`, padding `85px 72px` (~30mm/25mm)
-- Font size: body 12px, title 14px, subtitle 13px
-- Step validator — sequential unlock step 1-6, signature wajib step 2 & 3, UAT status wajib step 6. Tombol Unduh PDF disabled sampai semua step selesai. Update array `STEPS` jika field berubah
-- `.form-section.is-locked { opacity: 0.35; pointer-events: none }`
-- Stamp: `.doc-stamp-verified` (hijau pojok kanan), `.doc-stamp-rejected` (merah pojok kiri). Di-toggle via JS class `is-visible`
+- Layout dua kolom dengan `grid-template-columns: minmax(340px, 480px) 1fr`, responsive breakpoint di 900px
+- Tombol "Hapus" dan "Upload gambar" di `.sig-controls` styling seragam
+- Upload gambar menggunakan `<button>` + hidden `<input type="file">` — pastikan selector JS `[data-action="upload-sig"]` sesuai
+- Font size preview: body 12px, title 14px, subtitle 13px
+- Font: JetBrains Mono (monospace UI), Inter (sans-serif UI), Times New Roman (serif dokumen)
+- Validasi: 16 field input + 2 signature canvas wajib diisi. Tombol Unduh PDF disabled sampai semua terisi
+- Stamp: `.doc-stamp-verified` (hijau pojok kanan), `.doc-stamp-rejected` (merah pojok kiri). Di-toggle via JS class `is-selected`
+- Form collapsible: section bisa di-click header-nya untuk expand/collapse
 
 ## Limitasi
 - Signature tidak bisa di-undo per stroke (hanya clear all)
 - Tidak ada preview multi-halaman (single page)
-- Font hanya mengandalkan system fonts
+- Font hanya mengandalkan system fonts + CDN fonts
+- Preview menggunakan `html2canvas` — elemen tertentu (seperti QR code) mungkin perlu penanganan khusus
