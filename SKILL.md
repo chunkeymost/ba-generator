@@ -54,6 +54,36 @@ Buka `index.html` langsung dari browser (CDN tetap jalan meski via `file://`).
 - Stamp: `.doc-stamp-verified` (hijau pojok kanan), `.doc-stamp-rejected` (merah pojok kiri). Di-toggle via JS class `is-selected`
 - Form collapsible: section bisa di-click header-nya untuk expand/collapse
 
+## Release Workflow
+```bash
+# Buat tag versi baru
+git tag -a v1.0-beta -m "v1.0-beta"
+
+# Push tag ke remote
+git push origin v1.0-beta
+
+# Buat GitHub Release (via gh CLI)
+gh release create v1.0-beta --title "v1.0-beta" --notes "## Release Notes v1.0-beta
+
+Rilis perdana BA/// Generator — aplikasi web statis untuk membuat Berita Acara UAT.
+
+### Fitur
+- Form input 6 section dengan live preview dokumen
+- Signature pad (draw + upload) dengan localStorage persistence
+- QR Code generator dari URL dengan validasi otomatis
+- PDF export via html2canvas + jsPDF
+- UAT Status toggle (Verified / Rejected) dengan stamp preview
+- Random code generator di header dokumen
+- Auto-fill tanggal dengan format Indonesia
+- Validasi form sebelum download PDF
+- Responsive two-column layout dengan dark theme
+- Print styles support
+
+### Tech Stack
+- Vanilla HTML + CSS + JavaScript
+- CDN: qrcodejs, jsPDF, html2canvas"
+```
+
 ## Limitasi
 - Signature tidak bisa di-undo per stroke (hanya clear all)
 - Tidak ada preview multi-halaman (single page)
