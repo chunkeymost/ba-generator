@@ -46,17 +46,17 @@
   // 2. ELEMENT REFS — semua field input & target preview
   // ====================================================================
   const fields = [
-    { input: "input-doctitle", preview: "doc-title", mode: "text" },
-    { input: "input-subtitle", preview: "doc-subtitle", mode: "text" },
-    { input: "input-divisi", preview: "doc-divisi", mode: "text", extra: ["doc-divisi-2"] },
-    { input: "p1-nama", preview: "doc-p1-nama", mode: "text" },
-    { input: "p1-nrp", preview: "doc-p1-nrp", mode: "text" },
-    { input: "p1-jabatan", preview: "doc-p1-jabatan", mode: "text", extra: ["doc-p1-jabatan-2"] },
-    { input: "p2-nama", preview: "doc-p2-nama", mode: "text" },
-    { input: "p2-nrp", preview: "doc-p2-nrp", mode: "text" },
-    { input: "p2-jabatan", preview: "doc-p2-jabatan", mode: "text" },
-    { input: "input-statement", preview: "doc-statement", mode: "text" },
-    { input: "input-lokasi", preview: "doc-lokasi", mode: "text" },
+    { input: "input-doctitle", preview: "doc-title", fallback: "[Judul Berita Acara]" },
+    { input: "input-subtitle", preview: "doc-subtitle", fallback: "[Sub Judul / Kode CR]" },
+    { input: "input-divisi", preview: "doc-divisi", fallback: "[Divisi Pelaksana]", extra: ["doc-divisi-2"] },
+    { input: "p1-nama", preview: "doc-p1-nama", fallback: "[Nama Pihak 1]" },
+    { input: "p1-nrp", preview: "doc-p1-nrp", fallback: "[NRP Pihak 1]" },
+    { input: "p1-jabatan", preview: "doc-p1-jabatan", fallback: "[Jabatan Pihak 1]", extra: ["doc-p1-jabatan-2"] },
+    { input: "p2-nama", preview: "doc-p2-nama", fallback: "[Nama Pihak 2]" },
+    { input: "p2-nrp", preview: "doc-p2-nrp", fallback: "[NRP Pihak 2]" },
+    { input: "p2-jabatan", preview: "doc-p2-jabatan", fallback: "[Jabatan Pihak 2]" },
+    { input: "input-statement", preview: "doc-statement", fallback: "[Kalimat Pernyataan]" },
+    { input: "input-lokasi", preview: "doc-lokasi", fallback: "[Lokasi]" },
   ];
 
   function bindLiveSync() {
@@ -64,24 +64,24 @@
       const inputEl = document.getElementById(f.input);
       const previewEl = document.getElementById(f.preview);
       const update = () => {
-        const val = inputEl.value || "";
-        previewEl.textContent = val;
+        const val = inputEl.value.trim();
+        previewEl.textContent = val || f.fallback;
         if (f.extra) {
           f.extra.forEach((id) => {
             const el = document.getElementById(id);
-            if (el) el.textContent = val;
+            if (el) el.textContent = val || f.fallback;
           });
         }
       };
       inputEl.addEventListener("input", update);
-      update(); // initial sync
+      update();
     });
 
     // Tanggal: gabungan lokasi + tanggal terformat
     function updateTanggalPreview() {
-      const raw = inputTanggal.value; // yyyy-mm-dd
+      const raw = inputTanggal.value;
       if (!raw) {
-        document.getElementById("doc-tanggal").textContent = "";
+        document.getElementById("doc-tanggal").textContent = "[Tanggal]";
         return;
       }
       const [y, m, d] = raw.split("-").map(Number);
@@ -92,22 +92,24 @@
     updateTanggalPreview();
 
     // Jabatan tanda tangan (nama + jabatan di bawah kolom signature)
-    function bindSigMeta(prefix, num) {
+    function bindSigMeta(prefix, num, namaToken, jabatanToken) {
       const namaInput = document.getElementById(prefix + "-nama");
       const jabatanInput = document.getElementById(prefix + "-jabatan-ttd");
       const namaPreview = document.getElementById("doc-sig-name-" + num);
       const rolePreview = document.getElementById("doc-sig-role-" + num);
 
       function update() {
-        namaPreview.textContent = namaInput.value || "";
-        rolePreview.textContent = jabatanInput.value ? "(" + jabatanInput.value + ")" : "";
+        const nama = namaInput.value.trim();
+        const jabatan = jabatanInput.value.trim();
+        namaPreview.textContent = nama || namaToken;
+        rolePreview.textContent = jabatan ? "(" + jabatan + ")" : "(" + jabatanToken + ")";
       }
       namaInput.addEventListener("input", update);
       jabatanInput.addEventListener("input", update);
       update();
     }
-    bindSigMeta("p1", "1");
-    bindSigMeta("p2", "2");
+    bindSigMeta("p1", "1", "[Nama Pihak 1]", "[Jabatan TTD Pihak 1]");
+    bindSigMeta("p2", "2", "[Nama Pihak 2]", "[Jabatan TTD Pihak 2]");
   }
 
   safeRun("live sync form-preview", bindLiveSync);
