@@ -423,6 +423,22 @@ input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus
   height: 130px;
   display: block;
 }
+.doc-qr-placeholder{
+  width: 130px;
+  height: 130px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+.doc-qr-placeholder-img{
+  width: 60px;
+  height: auto;
+  opacity: 0.4;
+}
+.doc-qr-placeholder.hidden,
+.doc-qr-canvas.hidden{ display: none; }
 
 .doc-body{ margin-bottom: 30px; text-align: justify; }
 

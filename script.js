@@ -181,17 +181,17 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         hasContent = false;
         wrap.classList.remove("has-sig");
+        resetDefaultOnModify(targetNum);
         syncSignatureToPreview(targetNum, null);
       },
       hasContent() {
         return hasContent;
       },
-      loadImage(dataUrl) {
+      loadImage(dataUrl, resetDefault) {
         const img = new Image();
         img.onload = function () {
           const rect = canvas.getBoundingClientRect();
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          // fit image within canvas while preserving aspect ratio
           const scale = Math.min(rect.width / img.width, rect.height / img.height);
           const w = img.width * scale;
           const h = img.height * scale;
@@ -200,6 +200,7 @@
           ctx.drawImage(img, x, y, w, h);
           hasContent = true;
           wrap.classList.add("has-sig");
+          if (resetDefault !== false) resetDefaultOnModify(targetNum);
           syncSignatureToPreview(targetNum, canvas.toDataURL("image/png"));
         };
         img.src = dataUrl;
@@ -216,15 +217,37 @@
     }
   }
 
+  function resetDefaultOnModify(num) {
+    const check = document.querySelector(`.sig-default-check[data-signer="${num}"]`);
+    if (check && check.checked) {
+      check.checked = false;
+      localStorage.setItem("ba-default-" + num, "false");
+      localStorage.removeItem("ba-sig-data-" + num);
+    }
+  }
+
   let sigPad1 = null;
   let sigPad2 = null;
 
   safeRun("inisialisasi signature pad 1", () => {
     sigPad1 = setupSignaturePad("sig-pad-1", "1");
+    restoreDefaultForPad("1", sigPad1);
   });
   safeRun("inisialisasi signature pad 2", () => {
     sigPad2 = setupSignaturePad("sig-pad-2", "2");
+    restoreDefaultForPad("2", sigPad2);
   });
+
+  function restoreDefaultForPad(num, pad) {
+    const check = document.querySelector(`.sig-default-check[data-signer="${num}"]`);
+    if (!check) return;
+    const saved = localStorage.getItem("ba-default-" + num) === "true";
+    const sigData = localStorage.getItem("ba-sig-data-" + num);
+    if (saved && sigData && pad) {
+      check.checked = true;
+      pad.loadImage(sigData, false);
+    }
+  }
 
   safeRun("tombol hapus tanda tangan", () => {
     document.querySelectorAll('[data-action="clear-sig"]').forEach((btn) => {
@@ -279,19 +302,6 @@
     });
   });
 
-  safeRun("restore default signature", () => {
-    document.querySelectorAll(".sig-default-check").forEach((check) => {
-      const num = check.dataset.signer;
-      const saved = localStorage.getItem("ba-default-" + num) === "true";
-      const sigData = localStorage.getItem("ba-sig-data-" + num);
-      if (saved && sigData) {
-        check.checked = true;
-        const pad = num === "1" ? sigPad1 : sigPad2;
-        if (pad) pad.loadImage(sigData);
-      }
-    });
-  });
-
   // ====================================================================
   // 4. QR CODE — muncul otomatis saat URL diisi (terisolasi penuh,
   //    supaya gagal di modul lain tidak ikut mematikan fitur ini)
@@ -299,9 +309,20 @@
   safeRun("QR code generator", () => {
     const inputQrUrl = document.getElementById("input-qr-url");
     const errorMsg = document.getElementById("error-msg");
-    const qrWrap = document.getElementById("doc-qr-wrap");
     const qrCanvas = document.getElementById("doc-qr-canvas");
+    const qrPlaceholder = document.getElementById("doc-qr-placeholder");
     let qrDebounceTimer = null;
+
+    function showPlaceholder() {
+      qrPlaceholder.classList.remove("hidden");
+      qrCanvas.classList.add("hidden");
+      qrCanvas.innerHTML = "";
+    }
+
+    function showQrCode() {
+      qrPlaceholder.classList.add("hidden");
+      qrCanvas.classList.remove("hidden");
+    }
 
     function normalizeUrl(raw) {
       let value = raw.trim();
@@ -321,15 +342,13 @@
       errorMsg.textContent = "";
 
       if (!rawValue.trim()) {
-        qrWrap.style.display = "none";
-        qrCanvas.innerHTML = "";
+        showPlaceholder();
         return;
       }
 
       const normalized = normalizeUrl(rawValue);
       if (!normalized) {
-        qrWrap.style.display = "none";
-        qrCanvas.innerHTML = "";
+        showPlaceholder();
         errorMsg.textContent = "URL tidak valid — periksa kembali penulisannya.";
         return;
       }
@@ -350,12 +369,12 @@
           colorLight: "#ffffff",
           correctLevel: QRCode.CorrectLevel.M,
         });
-        qrWrap.style.display = "flex";
+        showQrCode();
         generateRandomCode();
       } catch (err) {
         console.error("[BA Generator] Gagal membuat QR code:", err);
         errorMsg.textContent = "Gagal membuat QR code untuk tautan ini.";
-        qrWrap.style.display = "none";
+        showPlaceholder();
       }
     }
 
