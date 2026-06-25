@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BA/// Generator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="noise"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">BA</span><span class="brand-slash">///</span>
+      <span class="brand-name">GENERATOR</span>
+    </div>
+    <div class="topbar-meta">
+      <span class="dot"></span> DRAFT
+    </div>
+  </header>
+
+  <main class="layout">
+
+    <!-- LEFT: INPUT PANEL -->
+    <section class="panel panel-input">
+
+      <div class="step-indicator">
+        <div class="step-item is-active" data-step="1">
+          <span class="step-num">1</span>
+          <span class="step-label">Jenis &amp; Judul</span>
+        </div>
+        <span class="step-line"></span>
+        <div class="step-item" data-step="2">
+          <span class="step-num">2</span>
+          <span class="step-label">Pihak 1</span>
+        </div>
+        <span class="step-line"></span>
+        <div class="step-item" data-step="3">
+          <span class="step-num">3</span>
+          <span class="step-label">Pihak 2</span>
+        </div>
+        <span class="step-line"></span>
+        <div class="step-item" data-step="4">
+          <span class="step-num">4</span>
+          <span class="step-label">Pernyataan</span>
+        </div>
+        <span class="step-line"></span>
+        <div class="step-item" data-step="5">
+          <span class="step-num">5</span>
+          <span class="step-label">QR</span>
+        </div>
+        <span class="step-line"></span>
+        <div class="step-item" data-step="6">
+          <span class="step-num">6</span>
+          <span class="step-label">Status</span>
+        </div>
+      </div>
+
+      <div class="form-section" data-section="1">
+      <div class="panel-label"><span>01</span> JENIS &amp; JUDUL</div>
+      <div class="field">
+        <label for="input-doctitle">Judul berita acara</label>
+        <input type="text" id="input-doctitle" value="Berita Acara User Accepted Test (UAT)">
+      </div>
+      <div class="field">
+        <label for="input-subtitle">Sub judul / kode CR</label>
+        <input type="text" id="input-subtitle" value="Validation UAT [CR INTERNAL - GSS Enterprise] - Reset Password">
+        <p class="hint">Bagian dalam tanda kurung biasanya kode change request.</p>
+      </div>
+      <div class="field">
+        <label for="input-divisi">Divisi pelaksana</label>
+        <input type="text" id="input-divisi" value="Goodeva Div. Product">
+      </div>
+      </div>
+
+      <div class="form-section" data-section="2">
+      <div class="panel-label panel-label-spaced"><span>02</span> PIHAK 1</div>
+      <div class="field-row">
+        <div class="field-small">
+          <label for="p1-nama">Nama</label>
+          <input type="text" id="p1-nama" value="Asep Septiadi">
+        </div>
+        <div class="field-small">
+          <label for="p1-nrp">NRP</label>
+          <input type="text" id="p1-nrp" value="9001815">
+        </div>
+      </div>
+      <div class="field">
+        <label for="p1-jabatan">Jabatan (saat ini)</label>
+        <input type="text" id="p1-jabatan" value="Staff Div. Product">
+      </div>
+      <div class="field">
+        <label for="p1-jabatan-ttd">Jabatan (di kolom tanda tangan)</label>
+        <input type="text" id="p1-jabatan-ttd" value="Associate PM">
+        <p class="hint">Kadang berbeda dari jabatan di atas, seperti pada contoh dokumen.</p>
+      </div>
+      <div class="field">
+        <label>Tanda tangan Pihak 1</label>
+        <div class="sig-pad-wrap" data-signer="1">
+          <canvas class="sig-pad" id="sig-pad-1" width="360" height="140"></canvas>
+          <div class="sig-pad-empty">Gambar tanda tangan di sini</div>
+        </div>
+        <div class="sig-controls">
+          <button type="button" class="btn-chip" data-action="clear-sig" data-target="1">Hapus</button>
+          <button type="button" class="btn-chip" data-action="upload-sig" data-target="1">Upload gambar</button>
+        </div>
+        <input type="file" accept="image/*" class="sig-upload" data-target="1" hidden>
+      </div>
+
+      </div>
+
+      <div class="form-section" data-section="3">
+      <div class="panel-label panel-label-spaced"><span>03</span> PIHAK 2</div>
+      <div class="field-row">
+        <div class="field-small">
+          <label for="p2-nama">Nama</label>
+          <input type="text" id="p2-nama" value="Arif Mauldi">
+        </div>
+        <div class="field-small">
+          <label for="p2-nrp">NRP</label>
+          <input type="text" id="p2-nrp" value="9002560">
+        </div>
+      </div>
+      <div class="field">
+        <label for="p2-jabatan">Jabatan (saat ini)</label>
+        <input type="text" id="p2-jabatan" value="PM (Product Manager)">
+      </div>
+      <div class="field">
+        <label for="p2-jabatan-ttd">Jabatan (di kolom tanda tangan)</label>
+        <input type="text" id="p2-jabatan-ttd" value="Product Manager">
+      </div>
+      <div class="field">
+        <label>Tanda tangan Pihak 2</label>
+        <div class="sig-pad-wrap" data-signer="2">
+          <canvas class="sig-pad" id="sig-pad-2" width="360" height="140"></canvas>
+          <div class="sig-pad-empty">Gambar tanda tangan di sini</div>
+        </div>
+        <div class="sig-controls">
+          <button type="button" class="btn-chip" data-action="clear-sig" data-target="2">Hapus</button>
+          <button type="button" class="btn-chip" data-action="upload-sig" data-target="2">Upload gambar</button>
+        </div>
+        <input type="file" accept="image/*" class="sig-upload" data-target="2" hidden>
+      </div>
+
+      </div>
+
+      <div class="form-section" data-section="4">
+      <div class="panel-label panel-label-spaced"><span>04</span> PERNYATAAN &amp; LOKASI</div>
+      <div class="field">
+        <label for="input-statement">Kalimat pernyataan (bagian yang ditegaskan)</label>
+        <input type="text" id="input-statement" value="Validasi UAT Tersebut">
+      </div>
+      <div class="field">
+        <label for="input-lokasi">Kota / lokasi penandatanganan</label>
+        <input type="text" id="input-lokasi" value="Bekasi">
+      </div>
+      <div class="field">
+        <label for="input-tanggal">Tanggal</label>
+        <input type="date" id="input-tanggal">
+        <p class="hint">Terisi otomatis hari ini — ubah bila perlu.</p>
+      </div>
+      </div>
+
+      <div class="form-section" data-section="5">
+      <div class="panel-label panel-label-spaced"><span>05</span> QR CODE</div>
+      <div class="field">
+        <label for="input-qr-url">Tautan referensi dokumen</label>
+        <input type="text" id="input-qr-url" placeholder="contoh.com/dokumen/uat-001">
+        <p class="hint">Kosongkan jika dokumen tidak perlu QR code. Boleh tanpa https:// — ditambahkan otomatis.</p>
+      </div>
+      </div>
+
+      <div class="form-section" data-section="6">
+      <div class="panel-label panel-label-spaced"><span>06</span> STATUS UAT</div>
+      <div class="field">
+        <label>Hasil validasi</label>
+        <input type="hidden" id="uat-status" value="">
+        <div class="toggle-group">
+          <button type="button" class="toggle-btn" data-value="verified">Verified</button>
+          <button type="button" class="toggle-btn" data-value="rejected">Rejected</button>
+        </div>
+      </div>
+      </div>
+
+      <p class="error-msg" id="error-msg"></p>
+
+      <div class="export-actions">
+        <button type="button" class="btn-download" id="btn-download-pdf">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2v8m0 0L5 7m3 3l3-3M3 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Unduh PDF
+        </button>
+      </div>
+    </section>
+
+    <!-- RIGHT: PREVIEW PANEL -->
+    <section class="panel panel-preview">
+      <div class="panel-label"><span>07</span> PRATINJAU DOKUMEN</div>
+
+      <div class="doc-stage">
+        <div class="doc-page" id="doc-page">
+
+          <h1 class="doc-title" id="doc-title">Berita Acara User Accepted Test (UAT)</h1>
+          <h2 class="doc-subtitle"><span id="doc-subtitle">Validation UAT [CR INTERNAL - GSS Enterprise] - Reset Password</span></h2>
+
+          <p class="doc-intro">Pada hari di <span id="doc-divisi" style="font-weight: bold;">Goodeva Div. Product</span> yang bertanda tangan di bawah ini:</p>
+
+          <div class="doc-parties">
+            <div class="doc-party">
+              <p class="doc-party-label">Sebagai PIHAK 1</p>
+              <table class="doc-table">
+                <tr><td>Nama</td><td>:</td><td id="doc-p1-nama">Asep Septiadi</td></tr>
+                <tr><td>NRP</td><td>:</td><td id="doc-p1-nrp">9001815</td></tr>
+                <tr><td>Jabatan</td><td>:</td><td id="doc-p1-jabatan">Staff Div. Product</td></tr>
+              </table>
+            </div>
+
+            <div class="doc-qr" id="doc-qr-wrap" style="display:none;">
+              <div id="doc-qr-canvas"></div>
+            </div>
+          </div>
+
+          <div class="doc-parties doc-parties-second">
+            <div class="doc-party">
+              <p class="doc-party-label">Sebagai PIHAK 2</p>
+              <table class="doc-table">
+                <tr><td>Nama</td><td>:</td><td id="doc-p2-nama">Arif Mauldi</td></tr>
+                <tr><td>NRP</td><td>:</td><td id="doc-p2-nrp">9002560</td></tr>
+                <tr><td>Jabatan</td><td>:</td><td id="doc-p2-jabatan">PM (Product Manager)</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <p class="doc-body">
+            Dengan ini menyatakan bahwa <span id="doc-divisi-2" style="font-weight: bold;">Div. Product</span> telah melaksanakan <span id="doc-statement" style="font-weight: bold;">Validasi UAT Tersebut</span> oleh PIHAK 1 selaku <span id="doc-p1-jabatan-2">Staff Div. Product</span>. Demikianlah berita acara laporan kegiatan ini dibuat dengan sebenar-benarnya.
+          </p>
+
+          <p class="doc-place-date">
+            <span id="doc-lokasi" style="font-weight: bold;">Bekasi</span>,<br>
+            <span id="doc-tanggal" style="font-weight: bold;">Selasa, 23 Juni 2026</span>
+          </p>
+
+          <div class="doc-signatures">
+            <div class="doc-sig-block">
+              <p class="doc-sig-heading" style="font-weight: bold;">Pihak 1</p>
+              <div class="doc-sig-image" id="doc-sig-1"></div>
+              <p class="doc-sig-name" id="doc-sig-name-1">Asep Septiadi</p>
+              <p class="doc-sig-role" id="doc-sig-role-1">(Associate PM)</p>
+            </div>
+            <div class="doc-sig-block">
+              <p class="doc-sig-heading" style="font-weight: bold;">Pihak 2</p>
+              <div class="doc-sig-image" id="doc-sig-2"></div>
+              <p class="doc-sig-name" id="doc-sig-name-2">Arif Mauldi</p>
+              <p class="doc-sig-role" id="doc-sig-role-2">(Product Manager)</p>
+            </div>
+          </div>
+
+          <div class="doc-stamp doc-stamp-verified">VERIFIED</div>
+          <div class="doc-stamp doc-stamp-rejected">REJECTED</div>
+          <p class="doc-page-number">1</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footnote">
+    Semua data diproses di perangkat Anda — tidak ada yang dikirim ke server.
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
