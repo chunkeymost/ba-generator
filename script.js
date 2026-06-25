@@ -319,6 +319,7 @@
           correctLevel: QRCode.CorrectLevel.M,
         });
         qrWrap.style.display = "flex";
+        generateRandomCode();
       } catch (err) {
         console.error("[BA Generator] Gagal membuat QR code:", err);
         errorMsg.textContent = "Gagal membuat QR code untuk tautan ini.";
@@ -348,80 +349,23 @@
   });
 
   // ====================================================================
-  // 5. STEP VALIDATOR — sequential form unlock
+  // 5. RANDOM CODE GENERATOR
   // ====================================================================
-  safeRun("step validator", () => {
-    const STEPS = [
-      { num: 1, inputs: ["input-doctitle", "input-subtitle", "input-divisi"], sig: null },
-      { num: 2, inputs: ["p1-nama", "p1-nrp", "p1-jabatan", "p1-jabatan-ttd"], sig: "1" },
-      { num: 3, inputs: ["p2-nama", "p2-nrp", "p2-jabatan", "p2-jabatan-ttd"], sig: "2" },
-      { num: 4, inputs: ["input-statement", "input-lokasi", "input-tanggal"], sig: null },
-      { num: 5, inputs: ["input-qr-url"], sig: null },
-      { num: 6, inputs: ["uat-status"], sig: null },
-    ];
-
-    function isStepComplete(step) {
-      for (const id of step.inputs) {
-        const el = document.getElementById(id);
-        if (!el || !el.value.trim()) {
-          return false;
-        }
-      }
-      if (step.sig) {
-        const wrap = document.querySelector(`.sig-pad-wrap[data-signer="${step.sig}"]`);
-        if (!wrap || !wrap.classList.contains("has-sig")) return false;
-      }
-      return true;
+  function generateRandomCode() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+    let result = "";
+    for (let i = 0; i < 10; i++) {
+      result += chars[Math.floor(Math.random() * chars.length)];
     }
+    document.getElementById("doc-code").textContent = result;
+  }
 
-    function updateSteps() {
-      let completedCount = 0;
-      for (let i = 0; i < STEPS.length; i++) {
-        if (isStepComplete(STEPS[i])) {
-          completedCount = i + 1;
-        } else {
-          break;
-        }
-      }
+  safeRun("random code generator init", generateRandomCode);
 
-      for (let i = 0; i < STEPS.length; i++) {
-        const stepNum = i + 1;
-        const item = document.querySelector(`.step-item[data-step="${stepNum}"]`);
-        const section = document.querySelector(`.form-section[data-section="${stepNum}"]`);
-        if (!item) continue;
-
-        item.classList.remove("is-active", "is-completed");
-        const numEl = item.querySelector(".step-num");
-
-        if (stepNum <= completedCount) {
-          item.classList.add("is-completed");
-          if (numEl) numEl.textContent = "✓";
-        } else if (stepNum === completedCount + 1) {
-          item.classList.add("is-active");
-          if (numEl) numEl.textContent = String(stepNum);
-        } else {
-          if (numEl) numEl.textContent = String(stepNum);
-        }
-
-        if (section) {
-          const isLocked = stepNum > completedCount + 1;
-          section.classList.toggle("is-locked", isLocked);
-        }
-      }
-      document.getElementById("btn-download-pdf").disabled = completedCount < STEPS.length;
-    }
-
-    const stepInputIds = STEPS.flatMap((s) => s.inputs);
-    stepInputIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) el.addEventListener("input", updateSteps);
-    });
-
-    document.querySelectorAll(".sig-pad-wrap").forEach((wrap) => {
-      const obs = new MutationObserver(() => updateSteps());
-      obs.observe(wrap, { attributes: true, attributeFilter: ["class"] });
-    });
-
+  // ====================================================================
+  // 6. UAT STATUS TOGGLE
+  // ====================================================================
+  safeRun("UAT status toggle", () => {
     document.querySelectorAll(".toggle-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const val = btn.dataset.value;
@@ -431,14 +375,47 @@
         );
         document.querySelector(".doc-stamp-verified").classList.toggle("is-visible", val === "verified");
         document.querySelector(".doc-stamp-rejected").classList.toggle("is-visible", val === "rejected");
-        updateSteps();
+        updateDownloadButton();
       });
     });
-
-    document.getElementById("btn-download-pdf").disabled = true;
-
-    updateSteps();
   });
+
+  function updateDownloadButton() {
+    const inputIds = [
+      "input-doctitle", "input-subtitle", "input-divisi",
+      "p1-nama", "p1-nrp", "p1-jabatan", "p1-jabatan-ttd",
+      "p2-nama", "p2-nrp", "p2-jabatan", "p2-jabatan-ttd",
+      "input-statement", "input-lokasi", "input-tanggal",
+      "input-qr-url", "uat-status",
+    ];
+    const allFilled = inputIds.every(id => {
+      const el = document.getElementById(id);
+      return el && el.value.trim();
+    });
+    const sig1 = document.querySelector('.sig-pad-wrap[data-signer="1"].has-sig');
+    const sig2 = document.querySelector('.sig-pad-wrap[data-signer="2"].has-sig');
+    document.getElementById("btn-download-pdf").disabled = !(allFilled && sig1 && sig2);
+  }
+
+  const allInputIds = [
+    "input-doctitle", "input-subtitle", "input-divisi",
+    "p1-nama", "p1-nrp", "p1-jabatan", "p1-jabatan-ttd",
+    "p2-nama", "p2-nrp", "p2-jabatan", "p2-jabatan-ttd",
+    "input-statement", "input-lokasi", "input-tanggal",
+    "input-qr-url",
+  ];
+  allInputIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", updateDownloadButton);
+  });
+
+  document.querySelectorAll(".sig-pad-wrap").forEach(wrap => {
+    const obs = new MutationObserver(() => updateDownloadButton());
+    obs.observe(wrap, { attributes: true, attributeFilter: ["class"] });
+  });
+
+  updateDownloadButton();
+
   safeRun("export PDF", () => {
     const btnDownloadPdf = document.getElementById("btn-download-pdf");
     const docPage = document.getElementById("doc-page");

@@ -144,91 +144,7 @@ button, input, select, textarea{
 .panel-label-spaced{ margin-top: 36px; }
 
 /* ---------------- STEP INDICATOR ---------------- */
-.step-indicator{
-  display: flex;
-  align-items: center;
-  gap: 0;
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  background: var(--paper);
-  padding: 16px 0 20px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 24px;
-}
-.step-item{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-  min-width: 0;
-}
-.step-num{
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 2px solid var(--line);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--mono);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--ink-soft);
-  background: transparent;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-  flex-shrink: 0;
-}
-.step-label{
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.04em;
-  color: var(--ink-soft);
-  opacity: 0.6;
-  text-align: center;
-  white-space: nowrap;
-  transition: opacity 0.2s ease;
-}
-.step-line{
-  flex: 1;
-  height: 2px;
-  background: var(--line);
-  margin: 0 4px;
-  margin-top: -10px;
-  transition: background 0.2s ease;
-  min-width: 8px;
-}
 
-/* Active step */
-.step-item.is-active .step-num{
-  border-color: var(--signal);
-  background: var(--signal);
-  color: var(--ink);
-}
-.step-item.is-active .step-label{
-  opacity: 1;
-  color: var(--ink);
-  font-weight: 600;
-}
-
-/* Completed step */
-.step-item.is-completed .step-num{
-  border-color: var(--teal);
-  background: var(--teal);
-  color: #fff;
-}
-.step-item.is-completed .step-label{
-  opacity: 1;
-  color: var(--teal);
-}
-
-/* Locked section */
-.form-section.is-locked{
-  opacity: 0.35;
-  pointer-events: none;
-  user-select: none;
-}
 
 /* ---------------- FORM FIELDS ---------------- */
 .field{ margin-bottom: 18px; }
@@ -412,7 +328,7 @@ input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus
   max-width: 600px;
   aspect-ratio: 210 / 297;
   height: auto;
-  padding: 85px 72px;
+  padding: 85px 48px;
   box-shadow: 0 2px 4px rgba(20,23,28,0.06), 0 12px 32px rgba(20,23,28,0.12);
   border-radius: 2px;
   font-family: var(--serif-doc);
@@ -450,6 +366,9 @@ input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus
   gap: 4px;
 }
 
+.doc-party{
+  padding-left: 20px;
+}
 .doc-party-label{
   font-weight: 700;
   margin-bottom: 6px;
@@ -510,12 +429,28 @@ input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus
 .doc-sig-name{ font-weight: 700; margin-top: 38px; font-size: 12px; }
 .doc-sig-role{ font-size: 11px; }
 
-.doc-page-number{
+.doc-header{
+  position: absolute;
+  top: 18px;
+  left: 48px;
+  right: 48px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #ededed;
+}
+
+.doc-footer{
   position: absolute;
   bottom: 18px;
-  right: 22px;
+  left: 48px;
+  right: 48px;
+  display: flex;
+  justify-content: space-between;
   font-size: 11px;
-  color: #777;
+  color: #ededed;
+  font-family: var(--sans);
 }
 
 /* ---------------- WATERMARKS / STAMPS ---------------- */
@@ -530,7 +465,7 @@ input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus
 
 .doc-stamp-rejected{
   bottom: 55px;
-  left: 40px;
+  left: 48px;
   font-family: var(--mono);
   font-size: 13px;
   font-weight: 800;
@@ -544,7 +479,7 @@ input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus
 
 .doc-stamp-verified{
   bottom: 55px;
-  right: 40px;
+  right: 48px;
   font-family: var(--mono);
   font-size: 13px;
   font-weight: 800;
