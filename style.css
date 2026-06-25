@@ -157,6 +157,35 @@ label{
   color: var(--ink-soft);
 }
 
+.sig-label-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 7px;
+  width: 100%;
+}
+.sig-label{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  margin-bottom: 0;
+}
+.sig-default-check{
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+.sig-default-text{
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  opacity: 0.65;
+}
+
 input[type="text"], input[type="date"], textarea, select{
   width: 100%;
   background: var(--paper);
@@ -428,6 +457,7 @@ input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus
 }
 .doc-sig-name{ font-weight: 700; margin-top: 38px; font-size: 12px; }
 .doc-sig-role{ font-size: 11px; }
+
 
 .doc-header{
   position: absolute;

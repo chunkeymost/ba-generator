@@ -260,6 +260,38 @@
     });
   });
 
+  safeRun("toggle default signature", () => {
+    document.querySelectorAll(".sig-default-check").forEach((check) => {
+      check.addEventListener("change", function () {
+        const num = this.dataset.signer;
+        if (this.checked) {
+          const canvas = document.getElementById("sig-pad-" + num);
+          const wrap = canvas.closest(".sig-pad-wrap");
+          if (wrap.classList.contains("has-sig")) {
+            const dataUrl = canvas.toDataURL("image/png");
+            localStorage.setItem("ba-sig-data-" + num, dataUrl);
+          }
+        } else {
+          localStorage.removeItem("ba-sig-data-" + num);
+        }
+        localStorage.setItem("ba-default-" + num, this.checked);
+      });
+    });
+  });
+
+  safeRun("restore default signature", () => {
+    document.querySelectorAll(".sig-default-check").forEach((check) => {
+      const num = check.dataset.signer;
+      const saved = localStorage.getItem("ba-default-" + num) === "true";
+      const sigData = localStorage.getItem("ba-sig-data-" + num);
+      if (saved && sigData) {
+        check.checked = true;
+        const pad = num === "1" ? sigPad1 : sigPad2;
+        if (pad) pad.loadImage(sigData);
+      }
+    });
+  });
+
   // ====================================================================
   // 4. QR CODE — muncul otomatis saat URL diisi (terisolasi penuh,
   //    supaya gagal di modul lain tidak ikut mematikan fitur ini)
