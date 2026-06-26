@@ -559,8 +559,8 @@
         BA_DB.getPegawaiList(),
         BA_DB.getDokumenList(),
       ]).then(([pegawai, dokumen]) => {
-        populateSelect(selectP1, pegawai, "nama", "nrp");
-        populateSelect(selectP2, pegawai, "nama", "nrp");
+        populateSelect(selectP1, pegawai.filter(function (p) { return p.jenis === "p1"; }), "nama", "nrp");
+        populateSelect(selectP2, pegawai.filter(function (p) { return p.jenis === "p2"; }), "nama", "nrp");
         populateSelect(selectJudul, dokumen, "judul", null, "judul");
         const divisiUnik = [];
         const seen = {};
@@ -653,11 +653,11 @@
         return;
       }
 
-      BA_DB.addPegawai({ nama, nrp, jabatan, jabatan_ttd: jabatanTtd }).then((id) => {
+      BA_DB.addPegawai({ nama, nrp, jabatan, jabatan_ttd: jabatanTtd, jenis: activePrefix }).then((id) => {
         closePegawaiModal();
         return BA_DB.getPegawaiList().then((list) => {
-          populateSelect(selectP1, list, "nama", "nrp");
-          populateSelect(selectP2, list, "nama", "nrp");
+          populateSelect(selectP1, list.filter(function (p) { return p.jenis === "p1"; }), "nama", "nrp");
+          populateSelect(selectP2, list.filter(function (p) { return p.jenis === "p2"; }), "nama", "nrp");
           const sel = activePrefix === "p1" ? selectP1 : selectP2;
           sel.value = String(id);
           sel.dispatchEvent(new Event("change"));

@@ -91,6 +91,19 @@
     db.run(
       "CREATE INDEX IF NOT EXISTS idx_master_pegawai_nama ON master_pegawai(nama)"
     );
+    // Safe add jenis column — check if exists first
+    try {
+      var colInfo = db.exec("PRAGMA table_info(master_pegawai)");
+      var hasJenis = false;
+      if (colInfo.length > 0) {
+        for (var i = 0; i < colInfo[0].values.length; i++) {
+          if (colInfo[0].values[i][1] === "jenis") { hasJenis = true; break; }
+        }
+      }
+      if (!hasJenis) {
+        db.run("ALTER TABLE master_pegawai ADD COLUMN jenis TEXT NOT NULL DEFAULT 'p1'");
+      }
+    } catch (_) { /* table mungkin belum ada — skip */ }
     db.run(
       "CREATE TABLE IF NOT EXISTS master_dokumen (" +
       "  id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -134,8 +147,8 @@
     if (!BA_DB._db) return Promise.reject(new Error("Database belum siap"));
     try {
       BA_DB._db.run(
-        "INSERT INTO master_pegawai (nama, nrp, jabatan, jabatan_ttd) VALUES (?, ?, ?, ?)",
-        [data.nama, data.nrp || null, data.jabatan, data.jabatan_ttd]
+        "INSERT INTO master_pegawai (nama, nrp, jabatan, jabatan_ttd, jenis) VALUES (?, ?, ?, ?, ?)",
+        [data.nama, data.nrp || null, data.jabatan, data.jabatan_ttd, data.jenis || "p1"]
       );
       var id = BA_DB._db.exec("SELECT last_insert_rowid() AS id")[0].values[0][0];
       return saveDatabase().then(function () { return id; });
