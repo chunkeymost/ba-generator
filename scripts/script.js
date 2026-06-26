@@ -528,4 +528,127 @@
     });
   });
 
+  // ====================================================================
+  // 7. MASTER DATA — sql.js, modal, dropdown auto-fill
+  // ====================================================================
+  safeRun("master data - inisialisasi database", () => {
+    if (typeof BA_DB === "undefined") return;
+
+    const modal = document.getElementById("modal-master");
+    const modalClose = document.getElementById("modal-close");
+    const modalCancel = document.getElementById("modal-cancel");
+    const modalSave = document.getElementById("modal-save");
+    const selectP1 = document.getElementById("p1-master");
+    const selectP2 = document.getElementById("p2-master");
+    let activePrefix = "p1";
+
+    // Init sql.js + IndexedDB
+    BA_DB.init().then(loadDropdowns).catch((err) => {
+      console.error("[BA Generator] Gagal init database:", err);
+    });
+
+    function loadDropdowns() {
+      BA_DB.getPegawaiList().then((list) => {
+        populateSelect(selectP1, list);
+        populateSelect(selectP2, list);
+      }).catch((err) => {
+        console.error("[BA Generator] Gagal load data pegawai:", err);
+      });
+    }
+
+    function populateSelect(sel, list) {
+      const currentVal = sel.value;
+      sel.innerHTML = '<option value="">-- Tambah / Pilih Pegawai --</option>';
+      list.forEach((p) => {
+        const opt = document.createElement("option");
+        opt.value = p.id;
+        opt.textContent = p.nama + (p.nrp ? " (" + p.nrp + ")" : "");
+        sel.appendChild(opt);
+      });
+      if (currentVal) sel.value = currentVal;
+    }
+
+    // Tombol "+" → buka modal
+    document.querySelectorAll(".btn-add-master").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        activePrefix = btn.dataset.target;
+        document.getElementById("modal-nama").value = "";
+        document.getElementById("modal-nrp").value = "";
+        document.getElementById("modal-jabatan").value = "";
+        document.getElementById("modal-jabatan-ttd").value = "";
+        modal.classList.remove("hidden");
+        document.getElementById("modal-nama").focus();
+      });
+    });
+
+    function closeModal() {
+      modal.classList.add("hidden");
+    }
+
+    modalClose.addEventListener("click", closeModal);
+    modalCancel.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+        closeModal();
+      }
+    });
+
+    // Simpan data baru dari modal
+    modalSave.addEventListener("click", () => {
+      const nama = document.getElementById("modal-nama").value.trim();
+      const nrp = document.getElementById("modal-nrp").value.trim();
+      const jabatan = document.getElementById("modal-jabatan").value.trim();
+      const jabatanTtd = document.getElementById("modal-jabatan-ttd").value.trim();
+
+      if (!nama || !jabatan || !jabatanTtd) {
+        alert("Nama, Jabatan, dan Jabatan Tanda Tangan wajib diisi.");
+        return;
+      }
+
+      BA_DB.addPegawai({ nama, nrp, jabatan, jabatan_ttd: jabatanTtd }).then((id) => {
+        closeModal();
+        return BA_DB.getPegawaiList().then((list) => {
+          populateSelect(selectP1, list);
+          populateSelect(selectP2, list);
+          const sel = activePrefix === "p1" ? selectP1 : selectP2;
+          sel.value = String(id);
+          sel.dispatchEvent(new Event("change"));
+        });
+      }).catch((err) => {
+        console.error("[BA Generator] Gagal simpan data:", err);
+        alert("Gagal menyimpan data.");
+      });
+    });
+
+    // Dropdown → auto-fill form
+    function bindMasterSelect(prefix) {
+      const sel = document.getElementById(prefix + "-master");
+      sel.addEventListener("change", () => {
+        const id = parseInt(sel.value, 10);
+        if (!id) return;
+        BA_DB.getPegawaiList().then((list) => {
+          const p = list.find((x) => x.id === id);
+          if (!p) return;
+          setField(prefix + "-nama", p.nama);
+          setField(prefix + "-nrp", p.nrp || "");
+          setField(prefix + "-jabatan", p.jabatan);
+          setField(prefix + "-jabatan-ttd", p.jabatan_ttd);
+        });
+      });
+    }
+
+    function setField(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.value = value;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+
+    bindMasterSelect("p1");
+    bindMasterSelect("p2");
+  });
+
 })();
