@@ -561,7 +561,7 @@
       ]).then(([pegawai, dokumen]) => {
         populateSelect(selectP1, pegawai, "nama", "nrp");
         populateSelect(selectP2, pegawai, "nama", "nrp");
-        populateSelect(selectJudul, dokumen, "judul");
+        populateSelect(selectJudul, dokumen, "judul", null, "judul");
         const divisiUnik = [];
         const seen = {};
         dokumen.forEach((d) => {
@@ -576,12 +576,13 @@
       });
     }
 
-    function populateSelect(sel, list, labelKey, extraKey) {
+    function populateSelect(sel, list, labelKey, extraKey, valueKey) {
+      valueKey = valueKey || "id";
       const currentVal = sel.value;
       sel.innerHTML = '<option value="">-- Pilih --</option>';
       list.forEach((item) => {
         const opt = document.createElement("option");
-        opt.value = item.id;
+        opt.value = item[valueKey];
         let text = item[labelKey];
         if (extraKey && item[extraKey]) {
           text += " (" + item[extraKey] + ")";
@@ -680,7 +681,7 @@
       BA_DB.addDokumen({ judul, divisi }).then((id) => {
         closeDokumenModal();
         return BA_DB.getDokumenList().then((list) => {
-          populateSelect(selectJudul, list, "judul");
+          populateSelect(selectJudul, list, "judul", null, "judul");
           const divisiUnik = [];
           const seen = {};
           list.forEach((d) => {
@@ -690,8 +691,11 @@
             }
           });
           populateSelect(selectDivisi, divisiUnik, "nama");
-          selectJudul.value = String(id);
-          selectJudul.dispatchEvent(new Event("change"));
+          const baru = list.find((d) => d.id === id);
+          if (baru) {
+            selectJudul.value = baru.judul;
+            selectJudul.dispatchEvent(new Event("change"));
+          }
         });
       }).catch((err) => {
         console.error("[BA Generator] Gagal simpan dokumen:", err);
@@ -719,13 +723,13 @@
     // Dropdown judul → auto-fill divisi
     function bindDokumenSelect() {
       selectJudul.addEventListener("change", () => {
-        const id = parseInt(selectJudul.value, 10);
-        if (!id) {
+        const judul = selectJudul.value.trim();
+        if (!judul) {
           setField("input-divisi", "");
           return;
         }
         BA_DB.getDokumenList().then((list) => {
-          const d = list.find((x) => x.id === id);
+          const d = list.find((x) => x.judul === judul);
           if (!d) return;
           setField("input-divisi", d.divisi);
         });
