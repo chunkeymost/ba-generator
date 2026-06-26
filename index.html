@@ -26,10 +26,15 @@
     <section class="panel panel-input">
 
       <div class="form-section" data-section="1">
-      <div class="panel-label"><span>01</span> JENIS &amp; JUDUL</div>
+      <div class="panel-label">
+        <span>01</span> JENIS &amp; JUDUL
+        <button type="button" class="btn-add-master" data-target="dokumen" title="Tambah data dokumen">+</button>
+      </div>
       <div class="field">
         <label for="input-doctitle">Judul berita acara</label>
-        <input type="text" id="input-doctitle" placeholder="Mis: Berita Acara User Accepted Test (UAT)">
+        <select id="input-doctitle">
+          <option value="">-- Pilih / Tambah Judul --</option>
+        </select>
       </div>
       <div class="field">
         <label for="input-subtitle">Sub judul / kode CR</label>
@@ -38,7 +43,9 @@
       </div>
       <div class="field">
         <label for="input-divisi">Divisi pelaksana</label>
-        <input type="text" id="input-divisi" placeholder="Mis: Goodeva Div. Product">
+        <select id="input-divisi">
+          <option value="">-- Pilih / Tambah Divisi --</option>
+        </select>
       </div>
       </div>
 
@@ -305,6 +312,30 @@
       <div class="modal-footer">
         <button type="button" class="btn-chip" id="modal-cancel">Batal</button>
         <button type="button" class="btn-download" id="modal-save" style="width:auto;">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Master Dokumen -->
+  <div class="modal-overlay hidden" id="modal-dokumen">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span>Tambah Data Dokumen</span>
+        <button type="button" class="modal-close" id="modal-dok-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label for="modal-dok-judul">Judul berita acara</label>
+          <input type="text" id="modal-dok-judul" placeholder="Mis: Berita Acara User Accepted Test (UAT)">
+        </div>
+        <div class="field">
+          <label for="modal-dok-divisi">Divisi pelaksana</label>
+          <input type="text" id="modal-dok-divisi" placeholder="Mis: Goodeva Div. Product">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-chip" id="modal-dok-cancel">Batal</button>
+        <button type="button" class="btn-download" id="modal-dok-save" style="width:auto;">Simpan</button>
       </div>
     </div>
   </div>

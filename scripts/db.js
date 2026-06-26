@@ -91,6 +91,14 @@
     db.run(
       "CREATE INDEX IF NOT EXISTS idx_master_pegawai_nama ON master_pegawai(nama)"
     );
+    db.run(
+      "CREATE TABLE IF NOT EXISTS master_dokumen (" +
+      "  id INTEGER PRIMARY KEY AUTOINCREMENT," +
+      "  judul TEXT NOT NULL UNIQUE," +
+      "  divisi TEXT NOT NULL," +
+      "  created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))" +
+      ")"
+    );
   }
 
   // ====================================================================
@@ -147,6 +155,40 @@
   }
 
   // ====================================================================
+  // Dokumen CRUD
+  // ====================================================================
+  function getDokumenList() {
+    if (!BA_DB._db) return Promise.resolve([]);
+    try {
+      var stmt = BA_DB._db.prepare(
+        "SELECT * FROM master_dokumen ORDER BY judul ASC"
+      );
+      var rows = [];
+      while (stmt.step()) {
+        rows.push(stmt.getAsObject());
+      }
+      stmt.free();
+      return Promise.resolve(rows);
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }
+
+  function addDokumen(data) {
+    if (!BA_DB._db) return Promise.reject(new Error("Database belum siap"));
+    try {
+      BA_DB._db.run(
+        "INSERT INTO master_dokumen (judul, divisi) VALUES (?, ?)",
+        [data.judul, data.divisi]
+      );
+      var id = BA_DB._db.exec("SELECT last_insert_rowid() AS id")[0].values[0][0];
+      return saveDatabase().then(function () { return id; });
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }
+
+  // ====================================================================
   // Public API
   // ====================================================================
   window.BA_DB = {
@@ -156,6 +198,8 @@
     getPegawaiList: getPegawaiList,
     addPegawai: addPegawai,
     deletePegawai: deletePegawai,
+    getDokumenList: getDokumenList,
+    addDokumen: addDokumen,
   };
 
   // Proxy ready state

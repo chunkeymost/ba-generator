@@ -534,70 +534,114 @@
   safeRun("master data - inisialisasi database", () => {
     if (typeof BA_DB === "undefined") return;
 
-    const modal = document.getElementById("modal-master");
-    const modalClose = document.getElementById("modal-close");
-    const modalCancel = document.getElementById("modal-cancel");
-    const modalSave = document.getElementById("modal-save");
+    const modalPegawai = document.getElementById("modal-master");
+    const modalPegawaiClose = document.getElementById("modal-close");
+    const modalPegawaiCancel = document.getElementById("modal-cancel");
+    const modalPegawaiSave = document.getElementById("modal-save");
+
+    const modalDokumen = document.getElementById("modal-dokumen");
+    const modalDokumenClose = document.getElementById("modal-dok-close");
+    const modalDokumenCancel = document.getElementById("modal-dok-cancel");
+    const modalDokumenSave = document.getElementById("modal-dok-save");
+
     const selectP1 = document.getElementById("p1-master");
     const selectP2 = document.getElementById("p2-master");
+    const selectJudul = document.getElementById("input-doctitle");
+    const selectDivisi = document.getElementById("input-divisi");
     let activePrefix = "p1";
 
-    // Init sql.js + IndexedDB
     BA_DB.init().then(loadDropdowns).catch((err) => {
       console.error("[BA Generator] Gagal init database:", err);
     });
 
     function loadDropdowns() {
-      BA_DB.getPegawaiList().then((list) => {
-        populateSelect(selectP1, list);
-        populateSelect(selectP2, list);
+      Promise.all([
+        BA_DB.getPegawaiList(),
+        BA_DB.getDokumenList(),
+      ]).then(([pegawai, dokumen]) => {
+        populateSelect(selectP1, pegawai, "nama", "nrp");
+        populateSelect(selectP2, pegawai, "nama", "nrp");
+        populateSelect(selectJudul, dokumen, "judul");
+        const divisiUnik = [];
+        const seen = {};
+        dokumen.forEach((d) => {
+          if (!seen[d.divisi]) {
+            seen[d.divisi] = true;
+            divisiUnik.push({ id: d.divisi, nama: d.divisi });
+          }
+        });
+        populateSelect(selectDivisi, divisiUnik, "nama");
       }).catch((err) => {
-        console.error("[BA Generator] Gagal load data pegawai:", err);
+        console.error("[BA Generator] Gagal load master data:", err);
       });
     }
 
-    function populateSelect(sel, list) {
+    function populateSelect(sel, list, labelKey, extraKey) {
       const currentVal = sel.value;
-      sel.innerHTML = '<option value="">-- Tambah / Pilih Pegawai --</option>';
-      list.forEach((p) => {
+      sel.innerHTML = '<option value="">-- Pilih --</option>';
+      list.forEach((item) => {
         const opt = document.createElement("option");
-        opt.value = p.id;
-        opt.textContent = p.nama + (p.nrp ? " (" + p.nrp + ")" : "");
+        opt.value = item.id;
+        let text = item[labelKey];
+        if (extraKey && item[extraKey]) {
+          text += " (" + item[extraKey] + ")";
+        }
+        opt.textContent = text;
         sel.appendChild(opt);
       });
       if (currentVal) sel.value = currentVal;
     }
 
-    // Tombol "+" → buka modal
+    // Tombol "+" handler
     document.querySelectorAll(".btn-add-master").forEach((btn) => {
       btn.addEventListener("click", () => {
-        activePrefix = btn.dataset.target;
-        document.getElementById("modal-nama").value = "";
-        document.getElementById("modal-nrp").value = "";
-        document.getElementById("modal-jabatan").value = "";
-        document.getElementById("modal-jabatan-ttd").value = "";
-        modal.classList.remove("hidden");
-        document.getElementById("modal-nama").focus();
+        const target = btn.dataset.target;
+        if (target === "dokumen") {
+          document.getElementById("modal-dok-judul").value = "";
+          document.getElementById("modal-dok-divisi").value = "";
+          modalDokumen.classList.remove("hidden");
+          document.getElementById("modal-dok-judul").focus();
+        } else {
+          activePrefix = target;
+          document.getElementById("modal-nama").value = "";
+          document.getElementById("modal-nrp").value = "";
+          document.getElementById("modal-jabatan").value = "";
+          document.getElementById("modal-jabatan-ttd").value = "";
+          modalPegawai.classList.remove("hidden");
+          document.getElementById("modal-nama").focus();
+        }
       });
     });
 
-    function closeModal() {
-      modal.classList.add("hidden");
+    // Close modal helpers
+    function closePegawaiModal() {
+      modalPegawai.classList.add("hidden");
+    }
+    function closeDokumenModal() {
+      modalDokumen.classList.add("hidden");
     }
 
-    modalClose.addEventListener("click", closeModal);
-    modalCancel.addEventListener("click", closeModal);
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeModal();
+    modalPegawaiClose.addEventListener("click", closePegawaiModal);
+    modalPegawaiCancel.addEventListener("click", closePegawaiModal);
+    modalPegawai.addEventListener("click", (e) => {
+      if (e.target === modalPegawai) closePegawaiModal();
     });
+
+    modalDokumenClose.addEventListener("click", closeDokumenModal);
+    modalDokumenCancel.addEventListener("click", closeDokumenModal);
+    modalDokumen.addEventListener("click", (e) => {
+      if (e.target === modalDokumen) closeDokumenModal();
+    });
+
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !modal.classList.contains("hidden")) {
-        closeModal();
+      if (e.key === "Escape") {
+        if (!modalPegawai.classList.contains("hidden")) closePegawaiModal();
+        if (!modalDokumen.classList.contains("hidden")) closeDokumenModal();
       }
     });
 
-    // Simpan data baru dari modal
-    modalSave.addEventListener("click", () => {
+    // Simpan pegawai
+    modalPegawaiSave.addEventListener("click", () => {
       const nama = document.getElementById("modal-nama").value.trim();
       const nrp = document.getElementById("modal-nrp").value.trim();
       const jabatan = document.getElementById("modal-jabatan").value.trim();
@@ -609,10 +653,10 @@
       }
 
       BA_DB.addPegawai({ nama, nrp, jabatan, jabatan_ttd: jabatanTtd }).then((id) => {
-        closeModal();
+        closePegawaiModal();
         return BA_DB.getPegawaiList().then((list) => {
-          populateSelect(selectP1, list);
-          populateSelect(selectP2, list);
+          populateSelect(selectP1, list, "nama", "nrp");
+          populateSelect(selectP2, list, "nama", "nrp");
           const sel = activePrefix === "p1" ? selectP1 : selectP2;
           sel.value = String(id);
           sel.dispatchEvent(new Event("change"));
@@ -623,7 +667,39 @@
       });
     });
 
-    // Dropdown → auto-fill form
+    // Simpan dokumen
+    modalDokumenSave.addEventListener("click", () => {
+      const judul = document.getElementById("modal-dok-judul").value.trim();
+      const divisi = document.getElementById("modal-dok-divisi").value.trim();
+
+      if (!judul || !divisi) {
+        alert("Judul dan Divisi wajib diisi.");
+        return;
+      }
+
+      BA_DB.addDokumen({ judul, divisi }).then((id) => {
+        closeDokumenModal();
+        return BA_DB.getDokumenList().then((list) => {
+          populateSelect(selectJudul, list, "judul");
+          const divisiUnik = [];
+          const seen = {};
+          list.forEach((d) => {
+            if (!seen[d.divisi]) {
+              seen[d.divisi] = true;
+              divisiUnik.push({ id: d.divisi, nama: d.divisi });
+            }
+          });
+          populateSelect(selectDivisi, divisiUnik, "nama");
+          selectJudul.value = String(id);
+          selectJudul.dispatchEvent(new Event("change"));
+        });
+      }).catch((err) => {
+        console.error("[BA Generator] Gagal simpan dokumen:", err);
+        alert("Gagal menyimpan data. Mungkin judul sudah ada.");
+      });
+    });
+
+    // Dropdown pegawai → auto-fill
     function bindMasterSelect(prefix) {
       const sel = document.getElementById(prefix + "-master");
       sel.addEventListener("change", () => {
@@ -640,6 +716,22 @@
       });
     }
 
+    // Dropdown judul → auto-fill divisi
+    function bindDokumenSelect() {
+      selectJudul.addEventListener("change", () => {
+        const id = parseInt(selectJudul.value, 10);
+        if (!id) {
+          setField("input-divisi", "");
+          return;
+        }
+        BA_DB.getDokumenList().then((list) => {
+          const d = list.find((x) => x.id === id);
+          if (!d) return;
+          setField("input-divisi", d.divisi);
+        });
+      });
+    }
+
     function setField(id, value) {
       const el = document.getElementById(id);
       if (!el) return;
@@ -649,6 +741,7 @@
 
     bindMasterSelect("p1");
     bindMasterSelect("p2");
+    bindDokumenSelect();
   });
 
 })();
