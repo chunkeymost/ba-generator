@@ -512,13 +512,16 @@
 
         pdf.addImage(imgData, "JPEG", offsetX, offsetY, renderWidth, renderHeight);
 
-        const docTitleVal = document.getElementById("input-doctitle").value || "berita-acara";
-        const fileSafeName = docTitleVal
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)/g, "");
+        const docTitleVal = document.getElementById("input-doctitle").value.trim();
+        const docSubtitleVal = document.getElementById("input-subtitle").value.trim();
+        let pdfName = docTitleVal || "berita-acara";
+        if (docTitleVal && docSubtitleVal) {
+          pdfName = docTitleVal + " - " + docSubtitleVal;
+        } else if (docSubtitleVal) {
+          pdfName = docSubtitleVal;
+        }
 
-        pdf.save((fileSafeName || "berita-acara") + ".pdf");
+        pdf.save(pdfName + ".pdf");
       } catch (err) {
         errorMsg.textContent = "Gagal membuat PDF: " + err.message;
       } finally {
@@ -526,6 +529,312 @@
         btnDownloadPdf.innerHTML = originalLabel;
       }
     });
+  });
+
+  // ====================================================================
+  // 7. MASTER DATA — sql.js, modal, dropdown auto-fill
+  // ====================================================================
+  safeRun("master data - inisialisasi database", () => {
+    if (typeof BA_DB === "undefined") return;
+
+    const modalPegawai = document.getElementById("modal-master");
+    const modalPegawaiClose = document.getElementById("modal-close");
+    const modalPegawaiCancel = document.getElementById("modal-cancel");
+    const modalPegawaiSave = document.getElementById("modal-save");
+
+    const modalDokumen = document.getElementById("modal-dokumen");
+    const modalDokumenClose = document.getElementById("modal-dok-close");
+    const modalDokumenCancel = document.getElementById("modal-dok-cancel");
+    const modalDokumenSave = document.getElementById("modal-dok-save");
+
+    const selectP1 = document.getElementById("p1-master");
+    const selectP2 = document.getElementById("p2-master");
+    const selectJudul = document.getElementById("input-doctitle");
+    const selectDivisi = document.getElementById("input-divisi");
+    let activePrefix = "p1";
+
+    BA_DB.init().then(loadDropdowns).catch((err) => {
+      console.error("[BA Generator] Gagal init database:", err);
+    });
+
+    function loadDropdowns() {
+      Promise.all([
+        BA_DB.getPegawaiList(),
+        BA_DB.getDokumenList(),
+      ]).then(([pegawai, dokumen]) => {
+        populateSelect(selectP1, pegawai.filter(function (p) { return p.jenis === "p1"; }), "nama", "nrp");
+        populateSelect(selectP2, pegawai.filter(function (p) { return p.jenis === "p2"; }), "nama", "nrp");
+        populateSelect(selectJudul, dokumen, "judul", null, "judul");
+        const divisiUnik = [];
+        const seen = {};
+        dokumen.forEach((d) => {
+          if (!seen[d.divisi]) {
+            seen[d.divisi] = true;
+            divisiUnik.push({ id: d.divisi, nama: d.divisi });
+          }
+        });
+        populateSelect(selectDivisi, divisiUnik, "nama");
+        syncDeleteButton("p1-master");
+        syncDeleteButton("p2-master");
+        syncDeleteButton("input-doctitle");
+      }).catch((err) => {
+        console.error("[BA Generator] Gagal load master data:", err);
+      });
+    }
+
+    function populateSelect(sel, list, labelKey, extraKey, valueKey) {
+      valueKey = valueKey || "id";
+      const currentVal = sel.value;
+      sel.innerHTML = '<option value="">-- Pilih --</option>';
+      list.forEach((item) => {
+        const opt = document.createElement("option");
+        opt.value = item[valueKey];
+        let text = item[labelKey];
+        if (extraKey && item[extraKey]) {
+          text += " (" + item[extraKey] + ")";
+        }
+        opt.textContent = text;
+        sel.appendChild(opt);
+      });
+      if (currentVal) sel.value = currentVal;
+    }
+
+    // Tombol "+" handler
+    document.querySelectorAll(".btn-add-master").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.target;
+        if (target === "dokumen") {
+          document.getElementById("modal-dok-judul").value = "";
+          document.getElementById("modal-dok-divisi").value = "";
+          modalDokumen.classList.remove("hidden");
+          document.getElementById("modal-dok-judul").focus();
+        } else {
+          activePrefix = target;
+          document.getElementById("modal-nama").value = "";
+          document.getElementById("modal-nrp").value = "";
+          document.getElementById("modal-jabatan").value = "";
+          document.getElementById("modal-jabatan-ttd").value = "";
+          modalPegawai.classList.remove("hidden");
+          document.getElementById("modal-nama").focus();
+        }
+      });
+    });
+
+    // Close modal helpers
+    function closePegawaiModal() {
+      modalPegawai.classList.add("hidden");
+    }
+    function closeDokumenModal() {
+      modalDokumen.classList.add("hidden");
+    }
+
+    modalPegawaiClose.addEventListener("click", closePegawaiModal);
+    modalPegawaiCancel.addEventListener("click", closePegawaiModal);
+    modalPegawai.addEventListener("click", (e) => {
+      if (e.target === modalPegawai) closePegawaiModal();
+    });
+
+    modalDokumenClose.addEventListener("click", closeDokumenModal);
+    modalDokumenCancel.addEventListener("click", closeDokumenModal);
+    modalDokumen.addEventListener("click", (e) => {
+      if (e.target === modalDokumen) closeDokumenModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (!modalPegawai.classList.contains("hidden")) closePegawaiModal();
+        if (!modalDokumen.classList.contains("hidden")) closeDokumenModal();
+      }
+    });
+
+    // Simpan pegawai
+    modalPegawaiSave.addEventListener("click", () => {
+      const nama = document.getElementById("modal-nama").value.trim();
+      const nrp = document.getElementById("modal-nrp").value.trim();
+      const jabatan = document.getElementById("modal-jabatan").value.trim();
+      const jabatanTtd = document.getElementById("modal-jabatan-ttd").value.trim();
+
+      if (!nama || !jabatan || !jabatanTtd) {
+        alert("Nama, Jabatan, dan Jabatan Tanda Tangan wajib diisi.");
+        return;
+      }
+
+      BA_DB.addPegawai({ nama, nrp, jabatan, jabatan_ttd: jabatanTtd, jenis: activePrefix }).then((id) => {
+        closePegawaiModal();
+        return BA_DB.getPegawaiList().then((list) => {
+          populateSelect(selectP1, list.filter(function (p) { return p.jenis === "p1"; }), "nama", "nrp");
+          populateSelect(selectP2, list.filter(function (p) { return p.jenis === "p2"; }), "nama", "nrp");
+          syncDeleteButton("p1-master");
+          syncDeleteButton("p2-master");
+          const sel = activePrefix === "p1" ? selectP1 : selectP2;
+          sel.value = String(id);
+          sel.dispatchEvent(new Event("change"));
+        });
+      }).catch((err) => {
+        console.error("[BA Generator] Gagal simpan data:", err);
+        alert("Gagal menyimpan data.");
+      });
+    });
+
+    // Simpan dokumen
+    modalDokumenSave.addEventListener("click", () => {
+      const judul = document.getElementById("modal-dok-judul").value.trim();
+      const divisi = document.getElementById("modal-dok-divisi").value.trim();
+
+      if (!judul || !divisi) {
+        alert("Judul dan Divisi wajib diisi.");
+        return;
+      }
+
+      BA_DB.addDokumen({ judul, divisi }).then((id) => {
+        closeDokumenModal();
+        return BA_DB.getDokumenList().then((list) => {
+          populateSelect(selectJudul, list, "judul", null, "judul");
+          syncDeleteButton("input-doctitle");
+          const divisiUnik = [];
+          const seen = {};
+          list.forEach((d) => {
+            if (!seen[d.divisi]) {
+              seen[d.divisi] = true;
+              divisiUnik.push({ id: d.divisi, nama: d.divisi });
+            }
+          });
+          populateSelect(selectDivisi, divisiUnik, "nama");
+          const baru = list.find((d) => d.id === id);
+          if (baru) {
+            selectJudul.value = baru.judul;
+            selectJudul.dispatchEvent(new Event("change"));
+          }
+        });
+      }).catch((err) => {
+        console.error("[BA Generator] Gagal simpan dokumen:", err);
+        alert("Gagal menyimpan data. Mungkin judul sudah ada.");
+      });
+    });
+
+    function syncDeleteButton(selectId) {
+      const sel = document.getElementById(selectId);
+      const btn = document.querySelector('.btn-delete-item[data-select="' + selectId + '"]');
+      if (!btn) return;
+      btn.classList.toggle("visible", sel.value.trim() !== "");
+    }
+
+    // Dropdown pegawai → auto-fill
+    function bindMasterSelect(prefix) {
+      const sel = document.getElementById(prefix + "-master");
+      sel.addEventListener("change", () => {
+        syncDeleteButton(prefix + "-master");
+        const id = parseInt(sel.value, 10);
+        if (!id) return;
+        BA_DB.getPegawaiList().then((list) => {
+          const p = list.find((x) => x.id === id);
+          if (!p) return;
+          setField(prefix + "-nama", p.nama);
+          setField(prefix + "-nrp", p.nrp || "");
+          setField(prefix + "-jabatan", p.jabatan);
+          setField(prefix + "-jabatan-ttd", p.jabatan_ttd);
+        });
+      });
+    }
+
+    // Dropdown judul → auto-fill divisi
+    function bindDokumenSelect() {
+      selectJudul.addEventListener("change", () => {
+        syncDeleteButton("input-doctitle");
+        const judul = selectJudul.value.trim();
+        if (!judul) {
+          setField("input-divisi", "");
+          return;
+        }
+        BA_DB.getDokumenList().then((list) => {
+          const d = list.find((x) => x.judul === judul);
+          if (!d) return;
+          setField("input-divisi", d.divisi);
+        });
+      });
+    }
+
+    function setField(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.value = value;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+
+    // Tombol hapus data
+    function bindDeleteButtons() {
+      document.querySelectorAll(".btn-delete-item").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var selectId = btn.dataset.select;
+          var table = btn.dataset.table;
+          var sel = document.getElementById(selectId);
+          var value = sel.value.trim();
+          if (!value) return;
+
+          var label = sel.options[sel.selectedIndex].text;
+          if (!confirm('Hapus "' + label + '" dari data tersimpan?')) return;
+
+          function afterDelete() {
+            Promise.all([
+              BA_DB.getPegawaiList(),
+              BA_DB.getDokumenList(),
+            ]).then(function (arr) {
+              var pegawai = arr[0];
+              var dokumen = arr[1];
+              populateSelect(selectP1, pegawai.filter(function (p) { return p.jenis === "p1"; }), "nama", "nrp");
+              populateSelect(selectP2, pegawai.filter(function (p) { return p.jenis === "p2"; }), "nama", "nrp");
+              populateSelect(selectJudul, dokumen, "judul", null, "judul");
+              var divisiUnik = [];
+              var seen = {};
+              dokumen.forEach(function (d) {
+                if (!seen[d.divisi]) {
+                  seen[d.divisi] = true;
+                  divisiUnik.push({ id: d.divisi, nama: d.divisi });
+                }
+              });
+              populateSelect(selectDivisi, divisiUnik, "nama");
+              sel.value = "";
+              syncDeleteButton(selectId);
+              // Reset form fields terkait
+              if (table === "pegawai") {
+                setField(selectId === "p1-master" ? "p1-nama" : "p2-nama", "");
+                setField(selectId === "p1-master" ? "p1-nrp" : "p2-nrp", "");
+                setField(selectId === "p1-master" ? "p1-jabatan" : "p2-jabatan", "");
+                setField(selectId === "p1-master" ? "p1-jabatan-ttd" : "p2-jabatan-ttd", "");
+              } else {
+                setField("input-doctitle", "");
+                setField("input-divisi", "");
+              }
+            }).catch(function (err) {
+              console.error("[BA Generator] Gagal reload setelah hapus:", err);
+            });
+          }
+
+          if (table === "pegawai") {
+            var id = parseInt(value, 10);
+            if (!id) return;
+            BA_DB.deletePegawai(id).then(afterDelete).catch(function (err) {
+              console.error("[BA Generator] Gagal hapus data:", err);
+              alert("Gagal menghapus data.");
+            });
+          } else {
+            BA_DB.getDokumenList().then(function (list) {
+              var d = list.find(function (x) { return x.judul === value; });
+              if (!d) return;
+              BA_DB.deleteDokumen(d.id).then(afterDelete).catch(function (err) {
+                console.error("[BA Generator] Gagal hapus data:", err);
+                alert("Gagal menghapus data.");
+              });
+            });
+          }
+        });
+      });
+    }
+
+    bindMasterSelect("p1");
+    bindMasterSelect("p2");
+    bindDokumenSelect();
+    bindDeleteButtons();
   });
 
 })();

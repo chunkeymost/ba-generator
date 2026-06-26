@@ -9,22 +9,27 @@ Generator Berita Acara UAT — web statis, semua proses di browser, tanpa server
 - **QR Code** — generate otomatis dari URL dengan validasi
 - **PDF Export** — unduh dokumen sebagai PDF via html2canvas + jsPDF, ukuran ~200-400 KB
 - **UAT Status** — toggle Verified / Rejected dengan stamp otomatis di preview
+- **Master Data Pegawai** — simpan data Pihak 1 & Pihak 2 (Nama, NRP, Jabatan, Jabatan TTD) via sql.js + IndexedDB, auto-fill & hapus dari dropdown
+- **Master Data Dokumen** — simpan Judul & Divisi via sql.js + IndexedDB, auto-fill & hapus dari dropdown
 - **Fully Client-Side** — tidak ada backend, data aman di browser
 
 ## Cara Pakai
 
 1. Buka `index.html` di browser
-2. Isi form secara berurutan
-3. Klik "Unduh PDF" untuk export
+2. Isi form secara berurutan (atau pilih dari master data pegawai/dokumen via dropdown)
+3. Hapus data tersimpan via ikon trash (muncul saat item dipilih)
+4. Klik "Unduh PDF" untuk export
 
 ## Tech Stack
 
 - HTML + CSS + JavaScript (vanilla)
-- CDN: qrcodejs, jsPDF, html2canvas
+- CDN: qrcodejs, jsPDF, html2canvas, sql.js
 - Font: JetBrains Mono, Inter, Times New Roman
 
 ## Struktur File
 
 - `index.html` — halaman utama
-- `script.js` — seluruh logika aplikasi
-- `style.css` — styling dark theme + preview
+- `scripts/script.js` — seluruh logika aplikasi
+- `scripts/db.js` — sql.js wrapper + IndexedDB
+- `styles/style.css` — styling dark theme + preview
+- `ARCHITECTURE.md` — dokumentasi arsitektur & skema DB

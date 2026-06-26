@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BA/// Generator</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
 
@@ -25,13 +25,19 @@
     <!-- LEFT: INPUT PANEL -->
     <section class="panel panel-input">
 
-
-
       <div class="form-section" data-section="1">
-      <div class="panel-label"><span>01</span> JENIS &amp; JUDUL</div>
-      <div class="field">
-        <label for="input-doctitle">Judul berita acara</label>
-        <input type="text" id="input-doctitle" placeholder="Mis: Berita Acara User Accepted Test (UAT)">
+      <div class="panel-label">
+        <span>01</span> JENIS &amp; JUDUL
+        <button type="button" class="btn-add-master" data-target="dokumen" title="Tambah data dokumen">+</button>
+      </div>
+      <div class="field-with-delete">
+        <div class="field">
+          <label for="input-doctitle">Judul berita acara</label>
+          <select id="input-doctitle">
+            <option value="">-- Pilih / Tambah Judul --</option>
+          </select>
+        </div>
+        <button type="button" class="btn-delete-item" data-select="input-doctitle" data-table="dokumen" title="Hapus data ini"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 011-1h2a1 1 0 011 1v1M5 4v9a1 1 0 001 1h4a1 1 0 001-1V4M6 7v4M10 7v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       </div>
       <div class="field">
         <label for="input-subtitle">Sub judul / kode CR</label>
@@ -40,12 +46,26 @@
       </div>
       <div class="field">
         <label for="input-divisi">Divisi pelaksana</label>
-        <input type="text" id="input-divisi" placeholder="Mis: Goodeva Div. Product">
+        <select id="input-divisi">
+          <option value="">-- Pilih / Tambah Divisi --</option>
+        </select>
       </div>
       </div>
 
       <div class="form-section" data-section="2">
-      <div class="panel-label panel-label-spaced"><span>02</span> PIHAK 1</div>
+      <div class="panel-label panel-label-spaced">
+        <span>02</span> PIHAK 1
+        <button type="button" class="btn-add-master" data-target="p1" title="Tambah data pegawai">+</button>
+      </div>
+      <div class="field-with-delete">
+        <div class="field">
+          <label for="p1-master">Pilih dari data tersimpan</label>
+          <select id="p1-master">
+            <option value="">-- Tambah / Pilih Pegawai --</option>
+          </select>
+        </div>
+        <button type="button" class="btn-delete-item" data-select="p1-master" data-table="pegawai" title="Hapus data ini"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 011-1h2a1 1 0 011 1v1M5 4v9a1 1 0 001 1h4a1 1 0 001-1V4M6 7v4M10 7v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
       <div class="field-row">
         <div class="field-small">
           <label for="p1-nama">Nama</label>
@@ -87,7 +107,19 @@
       </div>
 
       <div class="form-section" data-section="3">
-      <div class="panel-label panel-label-spaced"><span>03</span> PIHAK 2</div>
+      <div class="panel-label panel-label-spaced">
+        <span>03</span> PIHAK 2
+        <button type="button" class="btn-add-master" data-target="p2" title="Tambah data pegawai">+</button>
+      </div>
+      <div class="field-with-delete">
+        <div class="field">
+          <label for="p2-master">Pilih dari data tersimpan</label>
+          <select id="p2-master">
+            <option value="">-- Tambah / Pilih Pegawai --</option>
+          </select>
+        </div>
+        <button type="button" class="btn-delete-item" data-select="p2-master" data-table="pegawai" title="Hapus data ini"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 011-1h2a1 1 0 011 1v1M5 4v9a1 1 0 001 1h4a1 1 0 001-1V4M6 7v4M10 7v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
       <div class="field-row">
         <div class="field-small">
           <label for="p2-nama">Nama</label>
@@ -261,9 +293,67 @@
     Semua data diproses di perangkat Anda — tidak ada yang dikirim ke server.
   </footer>
 
+  <!-- Modal Master Data -->
+  <div class="modal-overlay hidden" id="modal-master">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span>Tambah Data Pegawai</span>
+        <button type="button" class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label for="modal-nama">Nama</label>
+          <input type="text" id="modal-nama" placeholder="Nama lengkap">
+        </div>
+        <div class="field">
+          <label for="modal-nrp">NRP</label>
+          <input type="text" id="modal-nrp" placeholder="Nomor NRP">
+        </div>
+        <div class="field">
+          <label for="modal-jabatan">Jabatan (saat ini)</label>
+          <input type="text" id="modal-jabatan" placeholder="Mis: Staff Div. Product">
+        </div>
+        <div class="field">
+          <label for="modal-jabatan-ttd">Jabatan (di kolom tanda tangan)</label>
+          <input type="text" id="modal-jabatan-ttd" placeholder="Mis: Associate PM">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-chip" id="modal-cancel">Batal</button>
+        <button type="button" class="btn-download" id="modal-save" style="width:auto;">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Master Dokumen -->
+  <div class="modal-overlay hidden" id="modal-dokumen">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span>Tambah Data Dokumen</span>
+        <button type="button" class="modal-close" id="modal-dok-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label for="modal-dok-judul">Judul berita acara</label>
+          <input type="text" id="modal-dok-judul" placeholder="Mis: Berita Acara User Accepted Test (UAT)">
+        </div>
+        <div class="field">
+          <label for="modal-dok-divisi">Divisi pelaksana</label>
+          <input type="text" id="modal-dok-divisi" placeholder="Mis: Goodeva Div. Product">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-chip" id="modal-dok-cancel">Batal</button>
+        <button type="button" class="btn-download" id="modal-dok-save" style="width:auto;">Simpan</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.11.0/sql-wasm.js"></script>
+  <script src="scripts/db.js"></script>
+  <script src="scripts/script.js"></script>
 </body>
 </html>
