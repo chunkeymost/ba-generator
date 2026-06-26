@@ -201,6 +201,16 @@
     }
   }
 
+  function deleteDokumen(id) {
+    if (!BA_DB._db) return Promise.reject(new Error("Database belum siap"));
+    try {
+      BA_DB._db.run("DELETE FROM master_dokumen WHERE id = ?", [id]);
+      return saveDatabase();
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }
+
   // ====================================================================
   // Public API
   // ====================================================================
@@ -213,6 +223,7 @@
     deletePegawai: deletePegawai,
     getDokumenList: getDokumenList,
     addDokumen: addDokumen,
+    deleteDokumen: deleteDokumen,
   };
 
   // Proxy ready state

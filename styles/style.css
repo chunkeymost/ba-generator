@@ -624,6 +624,34 @@ select#p1-master, select#p2-master{
   display: flex; align-items: center; gap: 6px;
 }
 
+/* ---------------- DELETE BUTTON ---------------- */
+.field-with-delete{
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  margin-bottom: 18px;
+}
+.field-with-delete .field{
+  flex: 1;
+  margin-bottom: 0;
+}
+.btn-delete-item{
+  width: 42px;
+  height: 42px;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.btn-delete-item.visible{ display: flex; }
+.btn-delete-item:hover{ background: #c0392b; color: #fff; border-color: #c0392b; }
+
 /* ---------------- ACCESSIBILITY ---------------- */
 :focus-visible{
   outline: 2.5px solid var(--signal);
