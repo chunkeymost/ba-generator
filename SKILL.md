@@ -48,7 +48,7 @@ Buka `index.html` langsung dari browser (CDN tetap jalan meski via `file://`).
 - Signature disimpan di canvas (`data:image/png`), bisa persist antar sesi via localStorage jika "Set Default" dicentang
 - QR code wajib diisi (step 5 terkunci sampai step 4 selesai)
 - `html2canvas` menggunakan scale 2x + JPEG quality 0.8 — ukuran PDF ~200-400 KB
-- Nama file PDF diambil dari judul dokumen (sanitasi otomatis)
+- Nama file PDF = `{Judul} - {Sub Judul}.pdf` (tanpa sanitasi, apa adanya). Fallback: `berita-acara.pdf`
 - `.doc-page`: `aspect-ratio: 210 / 297`, padding `85px 72px` (~30mm/25mm)
 - Layout dua kolom dengan `grid-template-columns: minmax(340px, 480px) 1fr`, responsive breakpoint di 900px
 - Tombol "Hapus" dan "Upload gambar" di `.sig-controls` styling seragam

@@ -136,7 +136,7 @@ Alasan satu tabel master_dokumen (judul + divisi digabung):
 | Set Default flag | localStorage | "true" / "false" | Permanen | Flag sederhana |
 | Form field values | In-memory (DOM) | String | Session | Sekali pakai → generate PDF |
 | QR code image | In-memory (canvas) | Canvas DOM | Session | Regenerated tiap URL berubah |
-| PDF output | Download file | .pdf (JPEG q0.8) | One-shot | Langsung di-download user |
+| PDF output | Download file | .pdf (JPEG q0.8) | One-shot | Nama = `{Judul} - {Sub Judul}.pdf`, tanpa sanitasi |
 
 ## 6. Data Flow
 
@@ -231,7 +231,11 @@ Alasan satu tabel master_dokumen (judul + divisi digabung):
                           canvas.toDataURL('image/jpeg', 0.8)
                                 │
                                 ▼
-                          jsPDF.addImage() → pdf.save()
+                          jsPDF.addImage()
+                                │
+                                ▼
+                          filename = {Judul} - {Sub Judul}.pdf
+                          pdf.save(filename)
 ```
 
 ## 7. Dependency Graph (Load Order)
