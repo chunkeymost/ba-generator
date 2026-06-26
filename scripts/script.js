@@ -512,13 +512,16 @@
 
         pdf.addImage(imgData, "JPEG", offsetX, offsetY, renderWidth, renderHeight);
 
-        const docTitleVal = document.getElementById("input-doctitle").value || "berita-acara";
-        const fileSafeName = docTitleVal
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)/g, "");
+        const docTitleVal = document.getElementById("input-doctitle").value.trim();
+        const docSubtitleVal = document.getElementById("input-subtitle").value.trim();
+        let pdfName = docTitleVal || "berita-acara";
+        if (docTitleVal && docSubtitleVal) {
+          pdfName = docTitleVal + " - " + docSubtitleVal;
+        } else if (docSubtitleVal) {
+          pdfName = docSubtitleVal;
+        }
 
-        pdf.save((fileSafeName || "berita-acara") + ".pdf");
+        pdf.save(pdfName + ".pdf");
       } catch (err) {
         errorMsg.textContent = "Gagal membuat PDF: " + err.message;
       } finally {
