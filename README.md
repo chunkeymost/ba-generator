@@ -7,7 +7,7 @@ Generator Berita Acara UAT — web statis, semua proses di browser, tanpa server
 - **Live Preview** — isian form langsung tampil di dokumen preview secara real-time
 - **Signature Pad** — tanda tangan via canvas (draw) atau upload gambar, bisa persist ke localStorage
 - **QR Code** — generate otomatis dari URL dengan validasi
-- **PDF Export** — unduh dokumen sebagai PDF via html2canvas + jsPDF
+- **PDF Export** — unduh dokumen sebagai PDF via html2canvas + jsPDF, ukuran ~200-400 KB
 - **UAT Status** — toggle Verified / Rejected dengan stamp otomatis di preview
 - **Fully Client-Side** — tidak ada backend, data aman di browser
 

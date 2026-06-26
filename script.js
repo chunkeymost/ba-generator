@@ -481,12 +481,12 @@
 
       try {
         const canvas = await html2canvas(docPage, {
-          scale: 3,
+          scale: 2,
           backgroundColor: "#ffffff",
           useCORS: true,
         });
 
-        const imgData = canvas.toDataURL("image/png");
+        const imgData = canvas.toDataURL("image/jpeg", 0.8);
         const { jsPDF } = window.jspdf;
 
         const pdf = new jsPDF({
@@ -510,7 +510,7 @@
         const offsetX = (pageWidth - renderWidth) / 2;
         const offsetY = 0;
 
-        pdf.addImage(imgData, "PNG", offsetX, offsetY, renderWidth, renderHeight);
+        pdf.addImage(imgData, "JPEG", offsetX, offsetY, renderWidth, renderHeight);
 
         const docTitleVal = document.getElementById("input-doctitle").value || "berita-acara";
         const fileSafeName = docTitleVal

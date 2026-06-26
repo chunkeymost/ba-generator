@@ -42,7 +42,7 @@ Buka `index.html` langsung dari browser (CDN tetap jalan meski via `file://`).
 - Fungsi di `script.js` dibungkus IIFE + `safeRun()` untuk isolasi
 - Signature disimpan di canvas (`data:image/png`), bisa persist antar sesi via localStorage jika "Set Default" dicentang
 - QR code wajib diisi (step 5 terkunci sampai step 4 selesai)
-- `html2canvas` menggunakan scale 3x untuk hasil PDF tajam
+- `html2canvas` menggunakan scale 2x + JPEG quality 0.8 — ukuran PDF ~200-400 KB
 - Nama file PDF diambil dari judul dokumen (sanitasi otomatis)
 - `.doc-page`: `aspect-ratio: 210 / 297`, padding `85px 72px` (~30mm/25mm)
 - Layout dua kolom dengan `grid-template-columns: minmax(340px, 480px) 1fr`, responsive breakpoint di 900px
@@ -85,6 +85,7 @@ Rilis perdana BA/// Generator — aplikasi web statis untuk membuat Berita Acara
 ```
 
 ## Limitasi
+- PDF dikompres dengan JPEG quality 0.8 — jika butuh kualitas lebih tinggi, naikkan parameter quality di script.js:489
 - Signature tidak bisa di-undo per stroke (hanya clear all)
 - Tidak ada preview multi-halaman (single page)
 - Font hanya mengandalkan system fonts + CDN fonts
