@@ -56,16 +56,17 @@ pengguna.
 
 ### scripts/db.js (sql.js + IndexedDB wrapper)
 
+Semua operasi CRUD untuk master pegawai & dokumen.
+
 Fungsi utama:
 - `initDatabase()` — load WASM sql.js, restore DB dari IndexedDB, migrasi schema
 - `saveDatabase()` — export DB ke binary, simpan ke IndexedDB
 - `getPegawaiList()` — SELECT * FROM master_pegawai ORDER BY nama
-- `addPegawai(data)` — INSERT + auto persist ke IndexedDB
+- `addPegawai(data)` — INSERT + auto persist ke IndexedDB (termasuk `jenis`)
 - `deletePegawai(id)` — DELETE + auto persist
 - `getDokumenList()` — SELECT * FROM master_dokumen ORDER BY judul
 - `addDokumen(data)` — INSERT + auto persist ke IndexedDB
-
-Semua operasi CRUD untuk master pegawai & dokumen.
+- `deleteDokumen(id)` — DELETE + auto persist
 
 Alur persistensi:
 
@@ -87,11 +88,11 @@ Alur persistensi:
 | Random code | ~407-416 | 10-char random di header dokumen |
 | UAT status toggle | ~421-434 | Verified / Rejected toggle |
 | Validation + PDF | ~436-529 | 16 field check + html2canvas → jsPDF |
-| Master data | ~535-750 | Modal CRUD pegawai & dokumen, dropdown, sql.js init, auto-fill |
+| Master data | ~535-830 | Modal CRUD pegawai & dokumen, dropdown, sql.js init, auto-fill, delete |
 
 ## 4. Database Schema
 
-Skema saat ini (Phase 1 & 2):
+Skema saat ini (Phase 1 - 3):
 
 ```sql
 -- Master data pegawai (Pihak 1 & 2)
@@ -101,6 +102,7 @@ CREATE TABLE master_pegawai (
     nrp          TEXT,
     jabatan      TEXT NOT NULL,
     jabatan_ttd  TEXT NOT NULL,
+    jenis        TEXT NOT NULL DEFAULT 'p1',  -- 'p1' atau 'p2'
     created_at   TEXT NOT NULL DEFAULT (datetime('now','localtime'))
 );
 
@@ -311,3 +313,5 @@ Fitur yang direncanakan untuk phase selanjutnya:
 |---|---|---|
 | 1 | Master Data Pegawai | Tabel `master_pegawai` — CRUD + dropdown + auto-fill NRP, Jabatan, Jabatan TTD |
 | 2 | Master Data Dokumen | Tabel `master_dokumen` — CRUD + dropdown + auto-fill Divisi saat Judul dipilih |
+| 3 | Pisah List P1/P2 | Kolom `jenis` (p1/p2) — dropdown P1 filter `jenis='p1'`, P2 filter `jenis='p2'` |
+| 3 | Hapus Master Data | Ikon trash per dropdown (visible hanya saat item terpilih) — konfirmasi → delete → reload → reset form |

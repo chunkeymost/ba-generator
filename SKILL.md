@@ -8,7 +8,7 @@ Aplikasi web statis untuk membuat Berita Acara (BA) UAT. Semua data diproses di 
 |---|---|
 | `index.html` | Struktur halaman, form input, preview dokumen, modal master data |
 | `scripts/script.js` | Logika aplikasi: live preview, QR code, signature pad, step validator, PDF export, master data modal |
-| `scripts/db.js` | sql.js wrapper + IndexedDB persistence untuk master data pegawai & dokumen |
+| `scripts/db.js` | sql.js wrapper + IndexedDB persistence — CRUD master data pegawai & dokumen |
 | `styles/style.css` | Semua styling (dark theme, layout, preview, print, modal) |
 | `SKILL.md` | File ini — panduan maintenance |
 
@@ -35,6 +35,7 @@ Buka `index.html` langsung dari browser (CDN tetap jalan meski via `file://`).
 8. Tombol "Unduh PDF": disabled sampai semua field (16 fields) + kedua signature terisi. Gunakan `html2canvas` + `jsPDF` untuk export
 9. **Master Data Pegawai**: Kelola data Pihak 1 dan Pihak 2 via tombol "+" di label section. Data tersimpan di sqlite via sql.js + IndexedDB. Dropdown auto-fill Nama, NRP, Jabatan, Jabatan TTD.
 10. **Master Data Dokumen**: Kelola Judul & Divisi via tombol "+" di label JENIS & JUDUL. Dropdown auto-fill Divisi saat Judul dipilih.
+11. **Hapus Master Data**: Setiap dropdown (Judul, Pihak 1, Pihak 2) memiliki ikon trash yang muncul hanya saat item valid terpilih. Konfirmasi hapus → hapus dari DB → reload dropdown → form reset ke "-- Pilih --".
 
 ## Cara Menambahkan Field Baru
 1. Tambah HTML di panel kiri (copy pola `.field` yang sudah ada)
@@ -57,7 +58,9 @@ Buka `index.html` langsung dari browser (CDN tetap jalan meski via `file://`).
 - Validasi: 16 field input + 2 signature canvas wajib diisi. Tombol Unduh PDF disabled sampai semua terisi
 - Stamp: `.doc-stamp-verified` (hijau pojok kanan), `.doc-stamp-rejected` (merah pojok kiri). Di-toggle via JS class `is-selected`
 - Form collapsible: section bisa di-click header-nya untuk expand/collapse
-- **Master Data**: Database sql.js disimpan di IndexedDB dengan key `master-data.sqlite`. Inisialisasi async di `scripts/db.js`. Schema: `master_pegawai` (id, nama, nrp, jabatan, jabatan_ttd, created_at) dan `master_dokumen` (id, judul, divisi, created_at).
+- **Master Data**: Database sql.js disimpan di IndexedDB dengan key `master-data.sqlite`. Inisialisasi async di `scripts/db.js`. Schema: `master_pegawai` (id, nama, nrp, jabatan, jabatan_ttd, jenis, created_at) dan `master_dokumen` (id, judul, divisi, created_at).
+- **Tombol Delete**: Icon trash di samping dropdown Judul, Pihak 1, dan Pihak 2. Hanya muncul saat item valid terpilih (`syncDeleteButton()`). Untuk pegawai, lookup by ID; untuk dokumen, lookup by judul text.
+- **Pisah List P1/P2**: Kolom `jenis` (p1/p2) di `master_pegawai`. Filter saat populate dropdown. Data existing default ke `p1`.
 
 ## Release Workflow
 ```bash
@@ -85,6 +88,8 @@ Rilis perdana BA/// Generator — aplikasi web statis untuk membuat Berita Acara
 - Print styles support
 - Master Data Pegawai (sqlite via sql.js + IndexedDB)
 - Master Data Dokumen (Judul & Divisi via sql.js + IndexedDB)
+- Hapus Master Data (ikon trash, konfirmasi, reload dropdown)
+- Pisah List P1/P2 (kolom jenis)
 
 ### Tech Stack
 - Vanilla HTML + CSS + JavaScript
