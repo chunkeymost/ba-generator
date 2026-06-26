@@ -65,6 +65,8 @@ Fungsi utama:
 - `getDokumenList()` — SELECT * FROM master_dokumen ORDER BY judul
 - `addDokumen(data)` — INSERT + auto persist ke IndexedDB
 
+Semua operasi CRUD untuk master pegawai & dokumen.
+
 Alur persistensi:
 
 ```
@@ -161,6 +163,47 @@ Alasan satu tabel master_dokumen (judul + divisi digabung):
                                            └──► updateDownloadButton()
 ```
 
+### Master Data Dokumen (Add + Auto-fill)
+
+```
+[User] ──klik [+] di label JENIS & JUDUL──► Modal tambah dokumen
+                                               │
+                                               ▼
+                                        Validasi (Judul & Divisi required)
+                                               │
+                                               ▼
+                                        db.addDokumen({judul, divisi})
+                                               │
+                                               ├──► INSERT INTO master_dokumen
+                                               └──► db.export() → idbPut('master-data.sqlite')
+                                               └──► Reload dropdown judul & divisi
+                                               └──► Auto-select judul baru
+                                                     │
+                                                     └──► dispatchEvent('change')
+                                                            │
+                                                            ├──► setField(input-divisi, divisi)
+                                                            │     └──► dispatchEvent('input')
+                                                            │           ├──► live preview update
+                                                            │           └──► updateDownloadButton()
+                                                            │
+                                                            └──► live preview update (judul)
+
+[User] ──pilih judul dari dropdown──► selectJudul.change()
+                                         │
+                                         ▼
+                                  db.getDokumenList()
+                                         │
+                                         ▼
+                                  cari record by judul
+                                         │
+                                         ▼
+                                  setField("input-divisi", d.divisi)
+                                         │
+                                         └──► dispatchEvent('input')
+                                               ├──► live preview update
+                                               └──► updateDownloadButton()
+```
+
 ### Form Input → Live Preview
 
 ```
@@ -255,10 +298,16 @@ Setiap modul di `script.js` dibungkus `safeRun(label, fn)`:
 Fitur yang direncanakan untuk phase selanjutnya:
 
 | Phase | Fitur | Perubahan Schema |
-|---|---|---|
-| 2 | History BA Log | Tambah tabel `ba_log` |
-| 2 | Master Divisi & Jabatan | Tambah tabel `divisi`, `jabatan` dengan FK |
-| 2 | Edit/Hapus Master | UI update/delete + konfirmasi relasi |
+|---|---|---|---|
+| 3 | History BA Log | Tambah tabel `ba_log` |
+| 3 | Edit/Hapus Master | UI update/delete + konfirmasi relasi |
 | 3 | Search Pegawai | Autocomplete input (bukan dropdown) |
-| 3 | Export/Import DB | Download .sqlite / upload restore |
-| 3 | Multiple Pihak | Bisa tambah pihak >2 |
+| 4 | Export/Import DB | Download .sqlite / upload restore |
+| 4 | Multiple Pihak | Bisa tambah pihak >2 |
+
+### Completed
+
+| Phase | Fitur | Keterangan |
+|---|---|---|
+| 1 | Master Data Pegawai | Tabel `master_pegawai` — CRUD + dropdown + auto-fill NRP, Jabatan, Jabatan TTD |
+| 2 | Master Data Dokumen | Tabel `master_dokumen` — CRUD + dropdown + auto-fill Divisi saat Judul dipilih |
