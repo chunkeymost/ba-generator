@@ -23,13 +23,14 @@ Generator Berita Acara UAT — web statis, semua proses di browser, tanpa server
 ## Tech Stack
 
 - HTML + CSS + JavaScript (vanilla)
-- CDN: qrcodejs, jsPDF, html2canvas, sql.js
+- CDN: qrcodejs, jsPDF, html2canvas, sql.js, @sentry/browser
 - Font: JetBrains Mono, Inter, Times New Roman
+- Error Tracking: Sentry (via browser.sentry-cdn.com)
 
 ## Struktur File
 
 - `index.html` — halaman utama
-- `scripts/script.js` — seluruh logika aplikasi
+- `scripts/script.js` — seluruh logika aplikasi + inisialisasi Sentry
 - `scripts/db.js` — sql.js wrapper + IndexedDB
 - `styles/style.css` — styling dark theme + preview
 - `ARCHITECTURE.md` — dokumentasi arsitektur & skema DB

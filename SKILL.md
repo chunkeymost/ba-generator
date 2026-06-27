@@ -18,6 +18,7 @@ Library dimuat via CDN — tidak perlu install npm atau download:
 - **jsPDF** — `https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js`
 - **html2canvas** — `https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js`
 - **sql.js** — `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.11.0/sql-wasm.js`
+- **@sentry/browser** — `https://browser.sentry-cdn.com/8.54.0/bundle.min.js`
 
 Tidak ada build tools, tidak ada package.json.
 
@@ -36,6 +37,7 @@ Buka `index.html` langsung dari browser (CDN tetap jalan meski via `file://`).
 9. **Master Data Pegawai**: Kelola data Pihak 1 dan Pihak 2 via tombol "+" di label section. Data tersimpan di sqlite via sql.js + IndexedDB. Dropdown auto-fill Nama, NRP, Jabatan, Jabatan TTD.
 10. **Master Data Dokumen**: Kelola Judul & Divisi via tombol "+" di label JENIS & JUDUL. Dropdown auto-fill Divisi saat Judul dipilih.
 11. **Hapus Master Data**: Setiap dropdown (Judul, Pihak 1, Pihak 2) memiliki ikon trash yang muncul hanya saat item valid terpilih. Konfirmasi hapus → hapus dari DB → reload dropdown → form reset ke "-- Pilih --".
+12. **Sentry Error Tracking**: Semua error yang melewati `safeRun()` atau catch blocks otomatis dikirim ke Sentry dashboard. Hidden trigger: double-click logo "BA///" untuk mengirim test error via `Sentry.captureException()`.
 
 ## Cara Menambahkan Field Baru
 1. Tambah HTML di panel kiri (copy pola `.field` yang sudah ada)
@@ -45,6 +47,7 @@ Buka `index.html` langsung dari browser (CDN tetap jalan meski via `file://`).
 
 ## Catatan Maintenance
 - Fungsi di `scripts/script.js` dibungkus IIFE + `safeRun()` untuk isolasi
+- Error dari `safeRun()` + seluruh catch blocks otomatis dikirim ke Sentry via `Sentry.captureException(err)`
 - Signature disimpan di canvas (`data:image/png`), bisa persist antar sesi via localStorage jika "Set Default" dicentang
 - QR code wajib diisi (step 5 terkunci sampai step 4 selesai)
 - `html2canvas` menggunakan scale 2x + JPEG quality 0.8 — ukuran PDF ~200-400 KB

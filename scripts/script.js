@@ -857,4 +857,18 @@
     bindDeleteButtons();
   });
 
+  // ====================================================================
+  // Hidden: double-click logo "BA///" → test Sentry error
+  // ====================================================================
+  safeRun("sentry test trigger", () => {
+    document.querySelector(".brand")?.addEventListener("dblclick", () => {
+      if (typeof Sentry !== "undefined") {
+        Sentry.captureException(
+          new Error("[TEST] Sentry integration test — " + new Date().toISOString())
+        );
+        console.log("[BA Generator] Test error sent to Sentry");
+      }
+    });
+  });
+
 })();

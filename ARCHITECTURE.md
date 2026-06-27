@@ -49,6 +49,7 @@ pengguna.
 | QR Code | qrcodejs 1.0.0 | CDN jsdelivr |
 | PDF Export | jsPDF 2.5.1 + html2canvas 1.4.1 | CDN cdnjs |
 | Database Engine | sql.js 1.11.0 (SQLite via WASM) | CDN cdnjs |
+| Error Tracking | @sentry/browser 8.54.0 | CDN browser.sentry-cdn.com |
 | Persistent Storage | IndexedDB + localStorage | Built-in browser |
 | Deployment | GitHub Pages | github.io |
 
@@ -247,8 +248,9 @@ index.html:
   3. jspdf CDN                                      (sync <script>)
   4. html2canvas CDN                                (sync <script>)
   5. sql.js CDN                                     (sync <script>, init async)
-  6. scripts/db.js                                  (sync, exposes window.BA_DB)
-  7. scripts/script.js                              (sync, calls BA_DB.init() async)
+  6. @sentry/browser CDN                            (sync <script>, exposes window.Sentry)
+  7. scripts/db.js                                  (sync, exposes window.BA_DB)
+  8. scripts/script.js                              (sync, calls Sentry.init() + BA_DB.init() async)
 ```
 
 Catatan: sql.js init bersifat async (fetch WASM binary ~1.2 MB). Form tetap bisa diisi
@@ -285,15 +287,25 @@ manual selama inisialisasi berlangsung. Dropdown baru terisi setelah DB ready.
 
 ## 9. Error Handling Strategy
 
+### Sentry Error Tracking
+Semua error yang melewati `safeRun()` atau catch blocks otomatis dikirim ke Sentry melalui `Sentry.captureException(err)`:
+- Error inisialisasi gagal (DB, QR, signature pad) → Sentry
+- Error operasi CRUD (gagal simpan/hapus data) → Sentry
+- Error PDF generation → Sentry
+- Hidden test trigger: double-click logo "BA///" di header → kirim test error ke Sentry
+
+DSN diinisialisasi di awal `script.js` dengan environment `production`. Bundle dimuat dari `browser.sentry-cdn.com` sebelum `db.js`.
+
 ### UI Error Isolation
 Setiap modul di `script.js` dibungkus `safeRun(label, fn)`:
 - Jika satu modul gagal (misal signature pad di browser tertentu), modul lain tetap berjalan
 - Error di-log ke console dengan prefix `[BA Generator]`
+- Error otomatis dikirim ke Sentry (tanpa mengganggu user experience)
 
 ### Database Error Handling
-- sql.js WASM gagal load → console.error, dropdown tetap kosong, form tetap bisa diisi manual
-- IndexedDB tidak tersedia/penuh → error di-log, operasi CRUD skipped tanpa crash
-- Semua operasi DB via Promise → `.catch()` tanpa crash propagation
+- sql.js WASM gagal load → console.error + Sentry, dropdown tetap kosong, form tetap bisa diisi manual
+- IndexedDB tidak tersedia/penuh → error di-log + Sentry, operasi CRUD skipped tanpa crash
+- Semua operasi DB via Promise → `.catch()` dengan Sentry + console.error tanpa crash propagation
 
 ### Form Validation
 - Tombol "Unduh PDF" disabled sampai 16 fields + 2 signatures terisi
