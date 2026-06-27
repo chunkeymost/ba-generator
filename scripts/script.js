@@ -1,6 +1,14 @@
 (function () {
   "use strict";
 
+  // Inisialisasi Sentry — error tracking
+  if (typeof Sentry !== "undefined") {
+    Sentry.init({
+      dsn: "https://0ab2f2ca78af9fcd9e5cbe0d8cfa9a42@o4511634775932928.ingest.us.sentry.io/4511634781044736",
+      environment: "production",
+    });
+  }
+
   // Menjalankan setiap modul secara terisolasi: kalau satu modul gagal
   // (misal signature pad bermasalah di browser tertentu), modul lain
   // seperti QR code tetap berjalan normal, bukan ikut mati semua.
@@ -9,6 +17,9 @@
       fn();
     } catch (err) {
       console.error("[BA Generator] Modul '" + label + "' gagal dijalankan:", err);
+      if (typeof Sentry !== "undefined") {
+        Sentry.captureException(err);
+      }
     }
   }
 
@@ -375,6 +386,7 @@
         generateRandomCode();
       } catch (err) {
         console.error("[BA Generator] Gagal membuat QR code:", err);
+        if (typeof Sentry !== "undefined") Sentry.captureException(err);
         errorMsg.textContent = "Gagal membuat QR code untuk tautan ini.";
         showPlaceholder();
       }
@@ -523,6 +535,7 @@
 
         pdf.save(pdfName + ".pdf");
       } catch (err) {
+        if (typeof Sentry !== "undefined") Sentry.captureException(err);
         errorMsg.textContent = "Gagal membuat PDF: " + err.message;
       } finally {
         btnDownloadPdf.disabled = false;
@@ -555,6 +568,7 @@
 
     BA_DB.init().then(loadDropdowns).catch((err) => {
       console.error("[BA Generator] Gagal init database:", err);
+      if (typeof Sentry !== "undefined") Sentry.captureException(err);
     });
 
     function loadDropdowns() {
@@ -579,6 +593,7 @@
         syncDeleteButton("input-doctitle");
       }).catch((err) => {
         console.error("[BA Generator] Gagal load master data:", err);
+        if (typeof Sentry !== "undefined") Sentry.captureException(err);
       });
     }
 
@@ -672,6 +687,7 @@
         });
       }).catch((err) => {
         console.error("[BA Generator] Gagal simpan data:", err);
+        if (typeof Sentry !== "undefined") Sentry.captureException(err);
         alert("Gagal menyimpan data.");
       });
     });
@@ -708,6 +724,7 @@
         });
       }).catch((err) => {
         console.error("[BA Generator] Gagal simpan dokumen:", err);
+        if (typeof Sentry !== "undefined") Sentry.captureException(err);
         alert("Gagal menyimpan data. Mungkin judul sudah ada.");
       });
     });
@@ -807,6 +824,7 @@
               }
             }).catch(function (err) {
               console.error("[BA Generator] Gagal reload setelah hapus:", err);
+              if (typeof Sentry !== "undefined") Sentry.captureException(err);
             });
           }
 
@@ -815,6 +833,7 @@
             if (!id) return;
             BA_DB.deletePegawai(id).then(afterDelete).catch(function (err) {
               console.error("[BA Generator] Gagal hapus data:", err);
+              if (typeof Sentry !== "undefined") Sentry.captureException(err);
               alert("Gagal menghapus data.");
             });
           } else {
@@ -823,6 +842,7 @@
               if (!d) return;
               BA_DB.deleteDokumen(d.id).then(afterDelete).catch(function (err) {
                 console.error("[BA Generator] Gagal hapus data:", err);
+                if (typeof Sentry !== "undefined") Sentry.captureException(err);
                 alert("Gagal menghapus data.");
               });
             });
