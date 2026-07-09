@@ -68,6 +68,7 @@
     { input: "p2-jabatan", preview: "doc-p2-jabatan", fallback: "[Jabatan Pihak 2]" },
     { input: "input-statement", preview: "doc-statement", fallback: "[Kalimat Pernyataan]" },
     { input: "input-lokasi", preview: "doc-lokasi", fallback: "[Lokasi]" },
+    { input: "input-catatan", preview: "doc-catatan", fallback: "" },
   ];
 
   function bindLiveSync() {
@@ -101,6 +102,20 @@
     }
     inputTanggal.addEventListener("input", updateTanggalPreview);
     updateTanggalPreview();
+
+    // Catatan: show/hide wrap saat kosong
+    (function syncCatatan() {
+      const inputCatatan = document.getElementById("input-catatan");
+      const catatanPreview = document.getElementById("doc-catatan");
+      const catatanWrap = document.getElementById("doc-notes-wrap");
+      function update() {
+        const val = inputCatatan.value.trim();
+        catatanPreview.textContent = val;
+        catatanWrap.classList.toggle("is-hidden", !val);
+      }
+      inputCatatan.addEventListener("input", update);
+      update();
+    })();
 
     // Jabatan tanda tangan (nama + jabatan di bawah kolom signature)
     function bindSigMeta(prefix, num, namaToken, jabatanToken) {
@@ -541,6 +556,12 @@
         btnDownloadPdf.disabled = false;
         btnDownloadPdf.innerHTML = originalLabel;
       }
+    });
+  });
+
+  safeRun("go top", () => {
+    document.getElementById("btn-go-top").addEventListener("click", () => {
+      document.querySelector(".panel-input").scrollTo({ top: 0, behavior: "smooth" });
     });
   });
 

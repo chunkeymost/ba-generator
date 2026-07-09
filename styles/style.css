@@ -308,6 +308,31 @@ input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus
 .btn-download:hover{ background: var(--teal); }
 .btn-download[disabled]{ opacity: 0.55; cursor: not-allowed; }
 
+.btn-go-top{
+  width: 100%;
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1.5px solid var(--ink-soft);
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-top: 6px;
+}
+.btn-go-top:hover{
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
 /* ---------------- TOGGLE GROUP ---------------- */
 .toggle-group{
   display: flex;
@@ -357,7 +382,7 @@ input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus
   max-width: 600px;
   aspect-ratio: 210 / 297;
   height: auto;
-  padding: 85px 48px;
+  padding: 58px 48px;
   box-shadow: 0 2px 4px rgba(20,23,28,0.06), 0 12px 32px rgba(20,23,28,0.12);
   border-radius: 2px;
   font-family: var(--serif-doc);
@@ -474,6 +499,18 @@ input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus
 .doc-sig-name{ font-weight: 700; margin-top: 38px; font-size: 12px; }
 .doc-sig-role{ font-size: 11px; }
 
+.doc-notes{
+  margin-top: 20px;
+  text-align: left;
+  font-size: 11px;
+  line-height: 1.5;
+  font-style: italic;
+  background: #fef9e7;
+  padding: 9px 10px;
+  border-radius: 6px;
+}
+.doc-notes-label{ font-weight: 700; }
+.doc-notes.is-hidden{ display: none; }
 
 .doc-header{
   position: absolute;

@@ -8,7 +8,7 @@
 </head>
 <body>
 
-  <div class="noise"></div>
+  <div class="noise"></div> 
 
   <header class="topbar">
     <div class="brand">
@@ -197,19 +197,31 @@
       </div>
       </div>
 
+      <div class="form-section" data-section="7">
+      <div class="panel-label panel-label-spaced"><span>07</span> CATATAN</div>
+      <div class="field">
+        <label for="input-catatan">Catatan rilis (jika ada)</label>
+        <textarea id="input-catatan" placeholder="Berita acara ini dirilis dengan catatan bahwa ..." rows="3"></textarea>
+      </div>
+      </div>
+
       <p class="error-msg" id="error-msg"></p>
 
       <div class="export-actions">
         <button type="button" class="btn-download" id="btn-download-pdf">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2v8m0 0L5 7m3 3l3-3M3 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Unduh PDF
+</button>
+        <button type="button" class="btn-go-top" id="btn-go-top">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 14V6m0 0L5 9m3-3 3 3M3 3h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Go Top
         </button>
       </div>
     </section>
 
     <!-- RIGHT: PREVIEW PANEL -->
     <section class="panel panel-preview">
-      <div class="panel-label"><span>07</span> PRATINJAU DOKUMEN</div>
+      <div class="panel-label"><span>08</span> PRATINJAU DOKUMEN</div>
 
       <div class="doc-stage">
         <div class="doc-page" id="doc-page">
@@ -276,6 +288,11 @@
               <p class="doc-sig-role" id="doc-sig-role-2">([Jabatan TTD Pihak 2])</p>
             </div>
           </div>
+
+          <p class="doc-notes" id="doc-notes-wrap">
+            <span class="doc-notes-label">Catatan:</span>
+            <span id="doc-catatan"></span>
+          </p>
 
           <div class="doc-stamp doc-stamp-verified">VERIFIED</div>
           <div class="doc-stamp doc-stamp-rejected">REJECTED</div>
