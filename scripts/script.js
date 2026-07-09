@@ -559,6 +559,12 @@
     });
   });
 
+  safeRun("go top", () => {
+    document.getElementById("btn-go-top").addEventListener("click", () => {
+      document.querySelector(".panel-input").scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
   // ====================================================================
   // 7. MASTER DATA — sql.js, modal, dropdown auto-fill
   // ====================================================================
