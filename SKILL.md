@@ -26,18 +26,20 @@ Tidak ada build tools, tidak ada package.json.
 Buka `index.html` langsung dari browser (CDN tetap jalan meski via `file://`).
 
 ## Cara Kerja
-1. Enam form section collapsible di panel kiri — isian langsung tampil di preview panel kanan
+1. Tujuh form section collapsible di panel kiri — isian langsung tampil di preview panel kanan
 2. Dokumen preview menggunakan format A4 (`aspect-ratio: 210 / 297`, padding ~30mm/25mm)
 3. Signature: canvas digambar manual atau upload gambar, bisa persist via localStorage jika checklist "Set Default" diaktifkan
 4. QR code: generate otomatis dari URL (350ms debounce), validasi URL, auto-prepend `https://`
 5. Random code 10 karakter (alfanumerik + simbol) digenerate otomatis di header dokumen
 6. Tanggal otomatis terisi hari ini, format Indonesia
 7. Step 6: toggle Verified/Rejected — wajib dipilih, muncul watermark/stamp di preview
-8. Tombol "Unduh PDF": disabled sampai semua field (16 fields) + kedua signature terisi. Gunakan `html2canvas` + `jsPDF` untuk export
-9. **Master Data Pegawai**: Kelola data Pihak 1 dan Pihak 2 via tombol "+" di label section. Data tersimpan di sqlite via sql.js + IndexedDB. Dropdown auto-fill Nama, NRP, Jabatan, Jabatan TTD.
-10. **Master Data Dokumen**: Kelola Judul & Divisi via tombol "+" di label JENIS & JUDUL. Dropdown auto-fill Divisi saat Judul dipilih.
-11. **Hapus Master Data**: Setiap dropdown (Judul, Pihak 1, Pihak 2) memiliki ikon trash yang muncul hanya saat item valid terpilih. Konfirmasi hapus → hapus dari DB → reload dropdown → form reset ke "-- Pilih --".
-12. **Sentry Error Tracking**: Semua error yang melewati `safeRun()` atau catch blocks otomatis dikirim ke Sentry dashboard. Hidden trigger: double-click logo "BA///" untuk mengirim test error via `Sentry.captureException()`.
+8. Section 7 CATATAN: textarea catatan rilis opsional, tampil di preview (background kuning) jika diisi, hidden jika kosong — sync otomatis via `syncCatatan()`
+9. Tombol "Unduh PDF": disabled sampai semua field (17 fields) + kedua signature terisi. Gunakan `html2canvas` + `jsPDF` untuk export
+10. Go Top: tombol scroll `.panel-input` ke atas dengan smooth behavior, muncul di bawah Unduh PDF
+11. **Master Data Pegawai**: Kelola data Pihak 1 dan Pihak 2 via tombol "+" di label section. Data tersimpan di sqlite via sql.js + IndexedDB. Dropdown auto-fill Nama, NRP, Jabatan, Jabatan TTD.
+12. **Master Data Dokumen**: Kelola Judul & Divisi via tombol "+" di label JENIS & JUDUL. Dropdown auto-fill Divisi saat Judul dipilih.
+13. **Hapus Master Data**: Setiap dropdown (Judul, Pihak 1, Pihak 2) memiliki ikon trash yang muncul hanya saat item valid terpilih. Konfirmasi hapus → hapus dari DB → reload dropdown → form reset ke "-- Pilih --".
+14. **Sentry Error Tracking**: Semua error yang melewati `safeRun()` atau catch blocks otomatis dikirim ke Sentry dashboard. Hidden trigger: double-click logo "BA///" untuk mengirim test error via `Sentry.captureException()`.
 
 ## Cara Menambahkan Field Baru
 1. Tambah HTML di panel kiri (copy pola `.field` yang sudah ada)
@@ -52,18 +54,20 @@ Buka `index.html` langsung dari browser (CDN tetap jalan meski via `file://`).
 - QR code wajib diisi (step 5 terkunci sampai step 4 selesai)
 - `html2canvas` menggunakan scale 2x + JPEG quality 0.8 — ukuran PDF ~200-400 KB
 - Nama file PDF = `{Judul} - {Sub Judul}.pdf` (tanpa sanitasi, apa adanya). Fallback: `berita-acara.pdf`
-- `.doc-page`: `aspect-ratio: 210 / 297`, padding `85px 72px` (~30mm/25mm)
+- `.doc-page`: `aspect-ratio: 210 / 297`, padding `58px 48px`
 - Layout dua kolom dengan `grid-template-columns: minmax(340px, 480px) 1fr`, responsive breakpoint di 900px
 - Tombol "Hapus" dan "Upload gambar" di `.sig-controls` styling seragam
 - Upload gambar menggunakan `<button>` + hidden `<input type="file">` — pastikan selector JS `[data-action="upload-sig"]` sesuai
 - Font size preview: body 12px, title 14px, subtitle 13px
 - Font: JetBrains Mono (monospace UI), Inter (sans-serif UI), Times New Roman (serif dokumen)
-- Validasi: 16 field input + 2 signature canvas wajib diisi. Tombol Unduh PDF disabled sampai semua terisi
+- Validasi: 17 field input + 2 signature canvas wajib diisi. Tombol Unduh PDF disabled sampai semua terisi
 - Stamp: `.doc-stamp-verified` (hijau pojok kanan), `.doc-stamp-rejected` (merah pojok kiri). Di-toggle via JS class `is-selected`
 - Form collapsible: section bisa di-click header-nya untuk expand/collapse
 - **Master Data**: Database sql.js disimpan di IndexedDB dengan key `master-data.sqlite`. Inisialisasi async di `scripts/db.js`. Schema: `master_pegawai` (id, nama, nrp, jabatan, jabatan_ttd, jenis, created_at) dan `master_dokumen` (id, judul, divisi, created_at).
 - **Tombol Delete**: Icon trash di samping dropdown Judul, Pihak 1, dan Pihak 2. Hanya muncul saat item valid terpilih (`syncDeleteButton()`). Untuk pegawai, lookup by ID; untuk dokumen, lookup by judul text.
 - **Pisah List P1/P2**: Kolom `jenis` (p1/p2) di `master_pegawai`. Filter saat populate dropdown. Data existing default ke `p1`.
+- **Catatan Rilis**: `.doc-notes` di preview dengan background `#fef9e7` (kuning), class `is-hidden` untuk show/hide. Sync via IIFE `syncCatatan()` di `script.js` — toggle class berdasarkan `inputCatatan.value.trim()`
+- **Go Top**: Tombol `.btn-go-top` di dalam `.export-actions` setelah `.btn-download`. Style outline (transparent + border), hover jadi solid. Event listener di `safeRun("go top", ...)` — scroll `.panel-input` dengan `behavior: "smooth"`
 
 ## Release Workflow
 ```bash

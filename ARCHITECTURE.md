@@ -83,13 +83,14 @@ Alur persistensi:
 | Modul | Baris | Fungsi |
 |---|---|---|
 | Auto-fill tanggal | ~40-43 | Isi input date hari ini |
-| Live preview sync | ~62-115 | Binding input → preview DOM |
+| Live preview sync | ~62-120 | Binding input → preview DOM + Catatan show/hide |
 | Signature pad | ~120-305 | Canvas draw + upload + localStorage |
 | QR code generator | ~311-401 | URL → QR code with 350ms debounce |
 | Random code | ~407-416 | 10-char random di header dokumen |
 | UAT status toggle | ~421-434 | Verified / Rejected toggle |
-| Validation + PDF | ~436-529 | 16 field check + html2canvas → jsPDF |
-| Master data | ~535-830 | Modal CRUD pegawai & dokumen, dropdown, sql.js init, auto-fill, delete |
+| Validation + PDF | ~438-570 | 17 field check + html2canvas → jsPDF |
+| Go Top | ~572-578 | Scroll `.panel-input` ke atas |
+| Master data | ~580-830 | Modal CRUD pegawai & dokumen, dropdown, sql.js init, auto-fill, delete |
 
 ## 4. Database Schema
 
@@ -218,9 +219,11 @@ Alasan satu tabel master_dokumen (judul + divisi digabung):
                             ▼
                      previewEl.textContent = value
                             │
-                     Signature: bindSigMeta()
-                            │
-                     UAT Status: toggle class is-visible
+                      Signature: bindSigMeta()
+                             │
+                      Catatan: toggle class is-hidden via syncCatatan()
+                             │
+                      UAT Status: toggle class is-visible
 ```
 
 ### PDF Generation
@@ -236,7 +239,14 @@ Alasan satu tabel master_dokumen (judul + divisi digabung):
                                 │
                                 ▼
                           filename = {Judul} - {Sub Judul}.pdf
-                          pdf.save(filename)
+                           pdf.save(filename)
+
+### Go Top (Scroll Panel Input)
+
+```
+[User] ──klik "Go Top"──► document.querySelector(".panel-input")
+                              .scrollTo({ top: 0, behavior: "smooth" })
+```
 ```
 
 ## 7. Dependency Graph (Load Order)
@@ -308,7 +318,7 @@ Setiap modul di `script.js` dibungkus `safeRun(label, fn)`:
 - Semua operasi DB via Promise → `.catch()` dengan Sentry + console.error tanpa crash propagation
 
 ### Form Validation
-- Tombol "Unduh PDF" disabled sampai 16 fields + 2 signatures terisi
+- Tombol "Unduh PDF" disabled sampai 17 fields + 2 signatures terisi
 - Modal required fields (Nama, Jabatan, Jabatan TTD) dicek sebelum INSERT
 
 ## 10. Future Architecture
@@ -331,3 +341,5 @@ Fitur yang direncanakan untuk phase selanjutnya:
 | 2 | Master Data Dokumen | Tabel `master_dokumen` — CRUD + dropdown + auto-fill Divisi saat Judul dipilih |
 | 3 | Pisah List P1/P2 | Kolom `jenis` (p1/p2) — dropdown P1 filter `jenis='p1'`, P2 filter `jenis='p2'` |
 | 3 | Hapus Master Data | Ikon trash per dropdown (visible hanya saat item terpilih) — konfirmasi → delete → reload → reset form |
+| 3 | Catatan Rilis | Section 7 CATATAN dengan textarea + preview show/hide di dokumen |
+| 3 | Go Top | Tombol scroll panel input ke atas di bawah Unduh PDF |

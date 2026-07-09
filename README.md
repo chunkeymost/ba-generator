@@ -9,6 +9,7 @@ Generator Berita Acara UAT — web statis, semua proses di browser, tanpa server
 - **QR Code** — generate otomatis dari URL dengan validasi
 - **PDF Export** — unduh dokumen sebagai PDF via html2canvas + jsPDF, ukuran ~200-400 KB
 - **UAT Status** — toggle Verified / Rejected dengan stamp otomatis di preview
+- **Catatan Rilis** — field catatan opsional untuk keterangan rilis BA, tampil di preview jika diisi
 - **Master Data Pegawai** — simpan data Pihak 1 & Pihak 2 (Nama, NRP, Jabatan, Jabatan TTD) via sql.js + IndexedDB, auto-fill & hapus dari dropdown
 - **Master Data Dokumen** — simpan Judul & Divisi via sql.js + IndexedDB, auto-fill & hapus dari dropdown
 - **Fully Client-Side** — tidak ada backend, data aman di browser
@@ -18,7 +19,9 @@ Generator Berita Acara UAT — web statis, semua proses di browser, tanpa server
 1. Buka `index.html` di browser
 2. Isi form secara berurutan (atau pilih dari master data pegawai/dokumen via dropdown)
 3. Hapus data tersimpan via ikon trash (muncul saat item dipilih)
-4. Klik "Unduh PDF" untuk export
+4. (Opsional) Isi catatan rilis di section CATATAN
+5. Klik "Unduh PDF" untuk export
+6. Klik "Go Top" untuk scroll panel input kembali ke atas
 
 ## Tech Stack
 
