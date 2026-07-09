@@ -357,7 +357,7 @@ input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus
   max-width: 600px;
   aspect-ratio: 210 / 297;
   height: auto;
-  padding: 85px 48px;
+  padding: 58px 48px;
   box-shadow: 0 2px 4px rgba(20,23,28,0.06), 0 12px 32px rgba(20,23,28,0.12);
   border-radius: 2px;
   font-family: var(--serif-doc);
@@ -474,6 +474,18 @@ input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus
 .doc-sig-name{ font-weight: 700; margin-top: 38px; font-size: 12px; }
 .doc-sig-role{ font-size: 11px; }
 
+.doc-notes{
+  margin-top: 20px;
+  text-align: left;
+  font-size: 11px;
+  line-height: 1.5;
+  font-style: italic;
+  background: #fef9e7;
+  padding: 9px 10px;
+  border-radius: 6px;
+}
+.doc-notes-label{ font-weight: 700; }
+.doc-notes.is-hidden{ display: none; }
 
 .doc-header{
   position: absolute;
