@@ -1,0 +1,24 @@
+{
+  "master_pegawai": [
+    {
+      "nama": "Arif Mauldi",
+      "nrp": "9002560",
+      "jabatan": "Staff Div. Product",
+      "jabatan_ttd": "Product Manager (PM)",
+      "jenis": "p2"
+    },
+    {
+      "nama": "Asep Septiadi",
+      "nrp": "9001815",
+      "jabatan": "Staff Div. Product",
+      "jabatan_ttd": "System Analyst & Associate PM",
+      "jenis": "p1"
+    }
+  ],
+  "master_dokumen": [
+    {
+      "judul": "Berita Acara User Accepted Test (UAT)",
+      "divisi": "Goodeva Div. Product"
+    }
+  ]
+}

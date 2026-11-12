@@ -73,8 +73,38 @@
       }
       runMigrations(BA_DB._db);
       BA_DB.ready = true;
-      return BA_DB;
+
+      if (savedData) {
+        return BA_DB;
+      }
+
+      // Seed default master data dari file data.json (kalau belum ada di IndexedDB)
+      return fetch("data.json")
+        .then(function (res) { return res.json(); })
+        .then(function (payload) { return seedFromJson(payload); })
+        .then(function () { return BA_DB; });
     });
+  }
+
+  function seedFromJson(payload) {
+    var db = BA_DB._db;
+    if (payload && Array.isArray(payload.master_pegawai)) {
+      payload.master_pegawai.forEach(function (row) {
+        if (!row || !row.nama) return;
+        db.run(
+          "INSERT INTO master_pegawai (nama, nrp, jabatan, jabatan_ttd, jenis) VALUES (?, ?, ?, ?, ?)",
+          [row.nama, row.nrp || null, row.jabatan, row.jabatan_ttd, row.jenis || "p1"]
+        );
+      });
+    }
+    if (payload && Array.isArray(payload.master_dokumen)) {
+      payload.master_dokumen.forEach(function (row) {
+        if (!row || !row.judul) return;
+        db.run("INSERT INTO master_dokumen (judul, divisi) VALUES (?, ?)", [row.judul, row.divisi]);
+      });
+    }
+    var data = BA_DB._db.export();
+    return idbPut(DB_FILE_KEY, data);
   }
 
   function runMigrations(db) {
@@ -211,6 +241,30 @@
     }
   }
 
+  // Export master data ke format JSON (dipakai untuk data.json / default sebelum deploy)
+  function exportMasterData() {
+    return Promise.all([getPegawaiList(), getDokumenList()]).then(function (results) {
+      var pegawai = results[0] || [];
+      var dokumen = results[1] || [];
+      var payload = { master_pegawai: [], master_dokumen: [] };
+      for (var i = 0; i < pegawai.length; i++) {
+        var p = pegawai[i];
+        payload.master_pegawai.push({
+          nama: p.nama,
+          nrp: p.nrp || "",
+          jabatan: p.jabatan,
+          jabatan_ttd: p.jabatan_ttd,
+          jenis: p.jenis || "p1",
+        });
+      }
+      for (var j = 0; j < dokumen.length; j++) {
+        var d = dokumen[j];
+        payload.master_dokumen.push({ judul: d.judul, divisi: d.divisi });
+      }
+      return payload;
+    });
+  }
+
   // ====================================================================
   // Public API
   // ====================================================================
@@ -224,6 +278,7 @@
     getDokumenList: getDokumenList,
     addDokumen: addDokumen,
     deleteDokumen: deleteDokumen,
+    exportMasterData: exportMasterData,
   };
 
   // Proxy ready state

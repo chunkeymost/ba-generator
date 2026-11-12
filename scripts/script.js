@@ -565,6 +565,37 @@
     });
   });
 
+  safeRun("export master data", () => {
+    const btnExportData = document.getElementById("btn-export-data");
+    const errorMsg = document.getElementById("error-msg");
+    btnExportData.addEventListener("click", async () => {
+      const originalLabel = btnExportData.innerHTML;
+      btnExportData.disabled = true;
+      btnExportData.innerHTML = "Mengambil Data…";
+
+      try {
+        const data = await BA_DB.exportMasterData();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "data.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        btnExportData.disabled = false;
+        btnExportData.innerHTML = originalLabel;
+      } catch (err) {
+        if (typeof Sentry !== "undefined") Sentry.captureException(err);
+        errorMsg.textContent = "Gagal export data master: " + err.message;
+        btnExportData.disabled = false;
+        btnExportData.innerHTML = originalLabel;
+      }
+    });
+  });
+
   // ====================================================================
   // 7. MASTER DATA — sql.js, modal, dropdown auto-fill
   // ====================================================================
