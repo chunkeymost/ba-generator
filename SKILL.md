@@ -34,12 +34,21 @@ Buka `index.html` langsung dari browser (CDN tetap jalan meski via `file://`).
 6. Tanggal otomatis terisi hari ini, format Indonesia
 7. Step 6: toggle Verified/Rejected — wajib dipilih, muncul watermark/stamp di preview
 8. Section 7 CATATAN: textarea catatan rilis opsional, tampil di preview (background kuning) jika diisi, hidden jika kosong — sync otomatis via `syncCatatan()`
-9. Tombol "Unduh PDF": disabled sampai semua field (17 fields) + kedua signature terisi. Gunakan `html2canvas` + `jsPDF` untuk export
+9. Tombol "Unduh PDF": disabled sampai semua field (17 fields) + kedua signature terisi. Gunakan `html2canvas` + `jsPDF` untuk export, lalu kirim metadata ke Google Apps Script
 10. Go Top: tombol scroll `.panel-input` ke atas dengan smooth behavior, muncul di bawah Unduh PDF
 11. **Master Data Pegawai**: Kelola data Pihak 1 dan Pihak 2 via tombol "+" di label section. Data tersimpan di sqlite via sql.js + IndexedDB. Dropdown auto-fill Nama, NRP, Jabatan, Jabatan TTD.
 12. **Master Data Dokumen**: Kelola Judul & Divisi via tombol "+" di label JENIS & JUDUL. Dropdown auto-fill Divisi saat Judul dipilih.
 13. **Hapus Master Data**: Setiap dropdown (Judul, Pihak 1, Pihak 2) memiliki ikon trash yang muncul hanya saat item valid terpilih. Konfirmasi hapus → hapus dari DB → reload dropdown → form reset ke "-- Pilih --".
 14. **Sentry Error Tracking**: Semua error yang melewati `safeRun()` atau catch blocks otomatis dikirim ke Sentry dashboard. Hidden trigger: double-click logo "BA///" untuk mengirim test error via `Sentry.captureException()`.
+
+## Integrasi Google Apps Script
+- Endpoint disimpan di konstanta `GOOGLE_SCRIPT_API_URL` di bagian atas `scripts/script.js`.
+- Saat tombol "Unduh PDF" diklik, `buildPayload()` mengambil nilai form secara real-time, lalu `sendToGoogleScript()` mengirim POST JSON paralel dengan pembuatan PDF.
+- Mapping payload: `judul` ← Judul; `sub_judul` ← Sub Judul; `div_pelaksana` ← Divisi; `divisi_1/2` ← Jabatan Pihak 1/2; `jabatan_saat_ini_1/2` ← Jabatan TTD; `tanggal_ba` diformat `DD/MM/YYYY`; `tautan_ba` dinormalisasi (auto `https://`).
+- `Content-Type: text/plain;charset=utf-8` dipakai agar request tidak memicu preflight CORS. Apps Script harus membaca `JSON.parse(e.postData.contents)` di `doPost(e)`.
+- Deploy Apps Script dengan akses **Anyone**, jika tidak request dari browser akan ditolak. Endpoint yang masih meminta login akan ditandai lewat respons redirect ke `accounts.google.com`.
+- Jika pengiriman gagal, PDF tetap terunduh; pesan error tampil di `#error-msg` dan dikirim ke Sentry.
+- Request dibatasi timeout 20 detik dan hanya dikirim sekali per klik (tombol di-disable selama proses).
 
 ## Cara Menambahkan Field Baru
 1. Tambah HTML di panel kiri (copy pola `.field` yang sudah ada)

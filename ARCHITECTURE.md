@@ -240,13 +240,36 @@ Alasan satu tabel master_dokumen (judul + divisi digabung):
                                 ▼
                           filename = {Judul} - {Sub Judul}.pdf
                            pdf.save(filename)
+```
+
+### Google Apps Script Integration
+
+```
+[User] ──klik "Unduh PDF"──┬─► html2canvas + jsPDF ─► pdf.save()
+                            │
+                            └─► buildPayload()
+                                     │
+                                     ▼
+                                POST GOOGLE_SCRIPT_API_URL
+                                Content-Type: text/plain;charset=utf-8
+                                     │
+                                     ▼
+                                Google Apps Script doPost(e)
+                                JSON.parse(e.postData.contents)
+```
+
+- Request dikirim paralel dengan pembuatan PDF; PDF tetap terunduh walau request gagal.
+- Payload diambil real-time dari form: judul, sub judul, divisi pelaksana, pihak 1/2
+  (nama, NRP, jabatan, jabatan TTD), pernyataan, lokasi, tanggal (`DD/MM/YYYY`),
+  tautan, dan catatan.
+- `text/plain` dipakai agar tidak memicu preflight CORS yang ditolak Apps Script.
+- Kegagalan pengiriman ditampilkan di `#error-msg` dan dilaporkan ke Sentry.
 
 ### Go Top (Scroll Panel Input)
 
 ```
 [User] ──klik "Go Top"──► document.querySelector(".panel-input")
                               .scrollTo({ top: 0, behavior: "smooth" })
-```
 ```
 
 ## 7. Dependency Graph (Load Order)

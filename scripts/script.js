@@ -9,6 +9,10 @@
     });
   }
 
+  // Endpoint Google Apps Script — ganti jika deployment diperbarui.
+  const GOOGLE_SCRIPT_API_URL =
+    "https://script.google.com/macros/s/AKfycbyT7C1Y_LE_0dt9whjqTTYAylxcqcy5AqpLEXLUG8JcuKoVPXWyw_7HYL92Xb6aviqw/exec";
+
   // Menjalankan setiap modul secara terisolasi: kalau satu modul gagal
   // (misal signature pad bermasalah di browser tertentu), modul lain
   // seperti QR code tetap berjalan normal, bukan ikut mati semua.
@@ -20,6 +24,22 @@
       if (typeof Sentry !== "undefined") {
         Sentry.captureException(err);
       }
+    }
+  }
+
+  // Normalisasi URL: tambahkan https:// bila belum ada skema, lalu validasi.
+  // Dipakai bersama oleh QR code dan payload Google Apps Script.
+  function normalizeUrl(raw) {
+    let value = raw.trim();
+    if (!value) return null;
+    if (!/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(value)) {
+      value = "https://" + value;
+    }
+    try {
+      new URL(value);
+      return value;
+    } catch (e) {
+      return null;
     }
   }
 
@@ -352,20 +372,6 @@
       qrCanvas.classList.remove("hidden");
     }
 
-    function normalizeUrl(raw) {
-      let value = raw.trim();
-      if (!value) return null;
-      if (!/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(value)) {
-        value = "https://" + value;
-      }
-      try {
-        new URL(value);
-        return value;
-      } catch (e) {
-        return null;
-      }
-    }
-
     function renderQr(rawValue) {
       errorMsg.textContent = "";
 
@@ -496,6 +502,90 @@
 
   updateDownloadButton();
 
+  // ====================================================================
+  // 6b. INTEGRASI GOOGLE APPS SCRIPT
+  //    Metadata berita acara dikirim saat tombol "Unduh PDF" diklik.
+  // ====================================================================
+  function getInputValue(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : "";
+  }
+
+  // input[type=date] menghasilkan YYYY-MM-DD → payload memakai DD/MM/YYYY.
+  function formatTanggalApi(value) {
+    if (!value) return "";
+    const parts = value.split("-");
+    if (parts.length !== 3) return value;
+    const [y, m, d] = parts;
+    return d + "/" + m + "/" + y;
+  }
+
+  function buildPayload() {
+    const tautanRaw = getInputValue("input-qr-url");
+    return {
+      judul: getInputValue("input-doctitle"),
+      sub_judul: getInputValue("input-subtitle"),
+      div_pelaksana: getInputValue("input-divisi"),
+      pihak_1: "Pihak 1",
+      nama_1: getInputValue("p1-nama"),
+      nrp_1: getInputValue("p1-nrp"),
+      divisi_1: getInputValue("p1-jabatan"),
+      jabatan_saat_ini_1: getInputValue("p1-jabatan-ttd"),
+      pihak_2: "Pihak 2",
+      nama_2: getInputValue("p2-nama"),
+      nrp_2: getInputValue("p2-nrp"),
+      divisi_2: getInputValue("p2-jabatan"),
+      jabatan_saat_ini_2: getInputValue("p2-jabatan-ttd"),
+      pernyataan_ba: getInputValue("input-statement"),
+      lokasi: getInputValue("input-lokasi"),
+      tanggal_ba: formatTanggalApi(getInputValue("input-tanggal")),
+      tautan_ba: normalizeUrl(tautanRaw) || tautanRaw,
+      catatan: getInputValue("input-catatan"),
+    };
+  }
+
+  async function sendToGoogleScript(payload) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+
+    try {
+      // text/plain = simple request, menghindari preflight CORS yang
+      // ditolak Apps Script. Di sisi script tetap dibaca via e.postData.contents.
+      const res = await fetch(GOOGLE_SCRIPT_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload),
+        redirect: "follow",
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        throw new Error("HTTP " + res.status);
+      }
+
+      // Kalau deployment belum "Anyone", Google mengalihkan ke halaman login.
+      const contentType = res.headers.get("content-type") || "";
+      if (/accounts\.google\.com/.test(res.url || "") || contentType.indexOf("text/html") !== -1) {
+        throw new Error(
+          "endpoint meminta login Google — ubah akses deployment Apps Script menjadi Anyone"
+        );
+      }
+
+      return res;
+    } catch (err) {
+      if (err && err.name === "AbortError") {
+        throw new Error("timeout 20 detik — endpoint tidak merespons");
+      }
+      if (err instanceof TypeError) {
+        throw new Error(
+          "koneksi ke endpoint ditolak — pastikan Web App di-deploy dengan akses Anyone"
+        );
+      }
+      throw err;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   safeRun("export PDF", () => {
     const btnDownloadPdf = document.getElementById("btn-download-pdf");
     const docPage = document.getElementById("doc-page");
@@ -505,6 +595,19 @@
       const originalLabel = btnDownloadPdf.innerHTML;
       btnDownloadPdf.disabled = true;
       btnDownloadPdf.innerHTML = "Menyiapkan PDF…";
+      errorMsg.textContent = "";
+
+      // Kirim metadata ke Google Apps Script paralel dengan pembuatan PDF.
+      // PDF tetap diunduh walau pengiriman gagal.
+      const apiResult = sendToGoogleScript(buildPayload()).then(
+        () => ({ ok: true }),
+        (err) => {
+          if (typeof Sentry !== "undefined") Sentry.captureException(err);
+          return { ok: false, error: err };
+        }
+      );
+
+      let pdfError = null;
 
       try {
         const canvas = await html2canvas(docPage, {
@@ -550,11 +653,19 @@
 
         pdf.save(pdfName + ".pdf");
       } catch (err) {
+        pdfError = err;
         if (typeof Sentry !== "undefined") Sentry.captureException(err);
         errorMsg.textContent = "Gagal membuat PDF: " + err.message;
       } finally {
         btnDownloadPdf.disabled = false;
         btnDownloadPdf.innerHTML = originalLabel;
+      }
+
+      const api = await apiResult;
+      if (!pdfError && !api.ok) {
+        const detail = api.error && api.error.message ? " (" + api.error.message + ")" : "";
+        errorMsg.textContent =
+          "PDF berhasil diunduh, tetapi data gagal dikirim ke Google Script" + detail + ".";
       }
     });
   });
