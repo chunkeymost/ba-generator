@@ -6,6 +6,7 @@
   --paper: #f2efe6;
   --paper-dim: #e7e2d3;
   --signal: #ff5a1f;
+  --nocturnal: #ff4400;
   --signal-dim: #ffb18c;
   --teal: #3d5a52;
   --line: rgba(20,23,28,0.12);
@@ -334,9 +335,9 @@ input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus
 }
 .btn-export-data{
   width: 100%;
-  background: transparent;
-  color: var(--ink-soft);
-  border: 1.5px solid var(--ink-soft);
+  background: var(--signal);
+  color: var(--paper);
+  border: 1.5px solid var(--signal);
   border-radius: 8px;
   padding: 12px 18px;
   font-family: var(--mono);
@@ -352,9 +353,24 @@ input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus
   margin-top: 6px;
 }
 .btn-export-data:hover{
-  background: var(--ink);
+  background: var(--nocturnal);
   color: var(--paper);
-  border-color: var(--ink);
+  border-color: var(--signal);
+}
+.btn-export-data[disabled]{
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.export-data-hint{
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  background: rgba(20, 23, 28, 0.05);
+  border: 1px dashed var(--ink-soft);
+  border-radius: 8px;
+  padding: 10px 12px;
 }
 
 /* ---------------- TOGGLE GROUP ---------------- */
